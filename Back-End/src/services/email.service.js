@@ -1,0 +1,132 @@
+const nodemailer = require('nodemailer');
+
+let transporterPromise = null;
+
+function getProvider() {
+  if (process.env.RESEND_API_KEY) return 'resend';
+  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) return 'smtp';
+  return process.env.EMAIL_PROVIDER || 'ethereal';
+}
+
+async function createTransporter() {
+  const provider = getProvider();
+
+  if (provider === 'resend') {
+    return nodemailer.createTransport({
+      host: 'smtp.resend.com',
+      port: 465,
+      secure: true,
+      auth: {
+        user: 'resend',
+        pass: process.env.RESEND_API_KEY,
+      },
+    });
+  }
+
+  if (provider === 'smtp') {
+    return nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT) || 587,
+      secure: process.env.SMTP_SECURE === 'true',
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+  }
+
+  // Free Ethereal test SMTP — no signup; opens a preview URL instead of a real inbox
+  const testAccount = await nodemailer.createTestAccount();
+  console.log('[email] Using free Ethereal Email (test inbox)');
+  console.log(`[email] Ethereal user: ${testAccount.user}`);
+
+  return nodemailer.createTransport({
+    host: testAccount.smtp.host,
+    port: testAccount.smtp.port,
+    secure: testAccount.smtp.secure,
+    auth: {
+      user: testAccount.user,
+      pass: testAccount.pass,
+    },
+  });
+}
+
+function getTransporter() {
+  if (!transporterPromise) {
+    transporterPromise = createTransporter();
+  }
+  return transporterPromise;
+}
+
+function getFromAddress() {
+  const provider = getProvider();
+  if (provider === 'resend') {
+    return process.env.SMTP_FROM || 'FinStock <onboarding@resend.dev>';
+  }
+  return process.env.SMTP_FROM || 'FinStock <noreply@finstock.local>';
+}
+
+async function sendMail({ to, subject, text, html }) {
+  const transport = await getTransporter();
+  const from = getFromAddress();
+  const provider = getProvider();
+
+  const info = await transport.sendMail({ from, to, subject, text, html });
+  const previewUrl = nodemailer.getTestMessageUrl(info) || null;
+
+  if (previewUrl) {
+    console.log(`[email] Preview (Ethereal): ${previewUrl}`);
+  } else {
+    console.log(`[email] Sent via ${provider} → ${to} (${info.messageId})`);
+  }
+
+  return {
+    queued: true,
+    provider,
+    messageId: info.messageId,
+    previewUrl,
+  };
+}
+
+async function sendWelcomeCredentials({ name, email, password, role }) {
+  const loginUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const subject = 'Your FinStock account credentials';
+  const text = [
+    `Hi ${name},`,
+    '',
+    'Your FinStock account has been created.',
+    '',
+    `Email: ${email}`,
+    `Temporary password: ${password}`,
+    `Role: ${role}`,
+    '',
+    `Sign in at: ${loginUrl}/login`,
+    '',
+    'Please change your password after your first login.',
+    '',
+    '— FinStock',
+  ].join('\n');
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 560px; color: #1a1a1a;">
+      <h2 style="margin-bottom: 8px;">Welcome to FinStock</h2>
+      <p>Hi ${name},</p>
+      <p>Your account has been created. Use the credentials below to sign in:</p>
+      <table style="border-collapse: collapse; margin: 16px 0;">
+        <tr><td style="padding: 4px 12px 4px 0;"><strong>Email</strong></td><td>${email}</td></tr>
+        <tr><td style="padding: 4px 12px 4px 0;"><strong>Password</strong></td><td><code>${password}</code></td></tr>
+        <tr><td style="padding: 4px 12px 4px 0;"><strong>Role</strong></td><td>${role}</td></tr>
+      </table>
+      <p><a href="${loginUrl}/login" style="display:inline-block;background:#0f766e;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none;">Sign in to FinStock</a></p>
+      <p style="color:#666;font-size:13px;">Please change your password after your first login.</p>
+    </div>
+  `;
+
+  return sendMail({ to: email, subject, text, html });
+}
+
+module.exports = {
+  getProvider,
+  sendMail,
+  sendWelcomeCredentials,
+};
