@@ -70,19 +70,23 @@ export function DataTable<T extends object>({
         </tbody>
       </table>
       <style>{`
-        .table-wrap { overflow-x: auto; margin: -0.25rem; }
+        .table-wrap {
+          overflow-x: auto;
+          margin: 0.15rem -0.15rem 0;
+          border-radius: var(--radius-md);
+        }
         .data-table { width: 100%; font-size: 0.875rem; }
         .data-table th {
           text-align: left;
-          padding: 0.7rem 0.85rem;
-          font-size: 0.72rem;
+          padding: 0.75rem 0.9rem;
+          font-size: 0.7rem;
           font-weight: 700;
           text-transform: uppercase;
-          letter-spacing: 0.04em;
+          letter-spacing: 0.05em;
           color: var(--color-text-secondary);
           border-bottom: 1px solid var(--color-border);
           white-space: nowrap;
-          background: var(--color-bg-muted);
+          background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
         }
         .data-table th.sortable { cursor: pointer; user-select: none; }
         .data-table th.sortable:hover { color: var(--color-text); }
@@ -90,11 +94,12 @@ export function DataTable<T extends object>({
         .th-inner svg { opacity: 0.35; }
         .th-inner svg.active { opacity: 1; color: var(--color-accent); }
         .data-table td {
-          padding: 0.8rem 0.85rem;
+          padding: 0.85rem 0.9rem;
           border-bottom: 1px solid var(--color-border);
           vertical-align: middle;
+          transition: background var(--transition);
         }
-        .data-table tbody tr:hover { background: #f8fafc; }
+        .data-table tbody tr:hover td { background: rgba(204, 251, 241, 0.28); }
         .data-table tbody tr:last-child td { border-bottom: none; }
       `}</style>
     </div>

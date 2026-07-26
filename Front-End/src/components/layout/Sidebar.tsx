@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, Link } from 'react-router-dom';
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -12,52 +12,15 @@ import {
   ClipboardList,
   ChevronDown,
   X,
+  Building2,
+  FileText,
+  Wallet,
+  UsersRound,
+  Sparkles,
+  ArrowLeftRight,
 } from 'lucide-react';
-import type { NavItem } from '../../types';
-
-const navItems: NavItem[] = [
-  { label: 'Dashboard', path: '/dashboard', icon: 'dashboard' },
-  {
-    label: 'Sales',
-    icon: 'sales',
-    children: [
-      { label: 'Daily Sales', path: '/sales/daily' },
-      { label: 'Sales Import', path: '/sales/import' },
-    ],
-  },
-  {
-    label: 'Inventory',
-    icon: 'inventory',
-    children: [
-      { label: 'Products', path: '/products' },
-      { label: 'Stock Items', path: '/inventory' },
-      { label: 'Stock Movements', path: '/inventory/movements' },
-    ],
-  },
-  {
-    label: 'Purchasing',
-    icon: 'purchasing',
-    children: [
-      { label: 'Suppliers', path: '/suppliers' },
-      { label: 'Purchase Orders', path: '/purchase-orders' },
-      { label: 'Goods Receipt', path: '/goods-receipt' },
-      { label: 'Supplier Invoices', path: '/supplier-invoices' },
-    ],
-  },
-  { label: 'Expenses', path: '/expenses', icon: 'expenses' },
-  { label: 'Reports', path: '/reports', icon: 'reports' },
-  { label: 'HMRC VAT', path: '/hmrc', icon: 'hmrc' },
-  {
-    label: 'Settings',
-    icon: 'settings',
-    children: [
-      { label: 'Company Profile', path: '/settings/company' },
-      { label: 'Users', path: '/settings/users' },
-      { label: 'Roles & Permissions', path: '/settings/roles' },
-    ],
-  },
-  { label: 'Audit Logs', path: '/audit', icon: 'audit' },
-];
+import { useModules } from '../../context/ModuleContext';
+import { APP_MODULES, navForModule } from '../../data/modules';
 
 const icons: Record<string, ReactNode> = {
   dashboard: <LayoutDashboard size={18} />,
@@ -67,6 +30,11 @@ const icons: Record<string, ReactNode> = {
   expenses: <Receipt size={18} />,
   reports: <BarChart3 size={18} />,
   hmrc: <Landmark size={18} />,
+  corporation: <Building2 size={18} />,
+  vat: <FileText size={18} />,
+  paye: <Wallet size={18} />,
+  payroll: <UsersRound size={18} />,
+  ai: <Sparkles size={18} />,
   settings: <Settings size={18} />,
   audit: <ClipboardList size={18} />,
 };
@@ -78,6 +46,10 @@ interface SidebarProps {
 
 export function Sidebar({ open, onClose }: SidebarProps) {
   const location = useLocation();
+  const { activeModule } = useModules();
+  const moduleMeta = APP_MODULES.find((m) => m.id === activeModule);
+  const navItems = activeModule ? navForModule(activeModule) : [];
+
   const [expanded, setExpanded] = useState<string[]>(() => {
     const openGroups: string[] = [];
     navItems.forEach((item) => {
@@ -105,11 +77,18 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           <div className="brand-mark">F</div>
           <div>
             <div className="brand-name">FinStock</div>
-            <div className="brand-tag">Restaurant Finance</div>
+            <div className="brand-tag">{moduleMeta?.name ?? 'Select module'}</div>
           </div>
           <button type="button" className="sidebar-close" onClick={onClose} aria-label="Close menu">
             <X size={20} />
           </button>
+        </div>
+
+        <div className="sidebar-switch">
+          <Link to="/modules" className="switch-module" onClick={onClose}>
+            <ArrowLeftRight size={16} />
+            Switch module
+          </Link>
         </div>
 
         <nav className="sidebar-nav">
@@ -150,6 +129,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
               <NavLink
                 key={item.path}
                 to={item.path!}
+                end={item.path === '/hmrc' || item.path === '/payroll' || item.path === '/ai'}
                 className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
                 onClick={onClose}
               >
@@ -184,14 +164,25 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         }
         .brand-mark {
           width: 36px; height: 36px; border-radius: 8px;
-          background: var(--color-accent);
+          background: linear-gradient(145deg, #14b8a6, #0f766e);
           color: white; font-weight: 700; font-size: 1.1rem;
           display: flex; align-items: center; justify-content: center;
           font-family: var(--font-display);
+          box-shadow: 0 6px 14px rgba(15, 118, 110, 0.35);
         }
         .brand-name { color: white; font-weight: 700; font-size: 1.05rem; line-height: 1.2; }
         .brand-tag { font-size: 0.7rem; color: var(--color-sidebar-text); }
         .sidebar-close { display: none; margin-left: auto; color: var(--color-sidebar-text); }
+        .sidebar-switch { padding: 0.75rem 0.65rem 0.15rem; }
+        .switch-module {
+          display: flex; align-items: center; gap: 0.5rem;
+          padding: 0.5rem 0.75rem;
+          border-radius: var(--radius-sm);
+          font-size: 0.8rem; font-weight: 600;
+          color: var(--color-sidebar-text);
+          border: 1px solid rgba(255,255,255,0.08);
+        }
+        .switch-module:hover { background: var(--color-sidebar-hover); color: white; }
         .sidebar-nav { padding: 0.85rem 0.65rem; display: flex; flex-direction: column; gap: 0.15rem; }
         .nav-link, .nav-parent {
           display: flex; align-items: center; gap: 0.65rem;
@@ -216,7 +207,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           color: var(--color-sidebar-text);
         }
         .nav-child:hover { color: white; background: var(--color-sidebar-hover); }
-        .nav-child.active { color: white; background: var(--color-accent); font-weight: 600; }
+        .nav-child.active { color: white; background: linear-gradient(135deg, #0f766e, #0d9488); font-weight: 600; }
 
         @media (max-width: 900px) {
           .sidebar-backdrop { display: block; }

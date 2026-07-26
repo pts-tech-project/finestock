@@ -15,12 +15,11 @@ export function Badge({
       <style>{`
         .badge {
           display: inline-flex; align-items: center;
-          padding: 0.15rem 0.55rem;
-          border-radius: 999px;
+          padding: 0.2rem 0.55rem;
+          border-radius: 6px;
           font-size: 0.72rem;
-          font-weight: 600;
+          font-weight: 700;
           letter-spacing: 0.02em;
-          text-transform: uppercase;
         }
         .badge-default { background: var(--color-accent-soft); color: var(--color-accent-text); }
         .badge-success { background: var(--color-success-bg); color: var(--color-success); }
@@ -58,16 +57,27 @@ export function Card({
       <style>{`
         .card {
           background: var(--color-bg-elevated);
-          border: 1px solid var(--color-border);
-          border-radius: var(--radius-md);
-          box-shadow: var(--shadow-sm);
-          padding: 1.25rem;
+          border: 1px solid rgba(226, 232, 240, 0.95);
+          border-radius: var(--radius-lg);
+          box-shadow: var(--shadow-md);
+          padding: 1.3rem 1.35rem;
+          transition: transform var(--transition), box-shadow var(--transition);
+        }
+        .card:hover {
+          box-shadow: 0 10px 28px rgba(12, 25, 41, 0.09);
         }
         .card-header {
           display: flex; align-items: center; justify-content: space-between;
-          margin-bottom: 1rem; gap: 0.75rem;
+          margin-bottom: 1.05rem; gap: 0.75rem;
+          padding-bottom: 0.85rem;
+          border-bottom: 1px solid var(--color-border);
         }
-        .card-title { font-size: 1rem; font-weight: 700; }
+        .card-title {
+          font-family: var(--font-display);
+          font-size: 1.05rem;
+          font-weight: 700;
+          letter-spacing: -0.015em;
+        }
       `}</style>
     </>
   );
@@ -88,6 +98,7 @@ export function StatCard({
   return (
     <>
       <div className="stat-card">
+        <div className="stat-accent" />
         <div className="stat-top">
           <span className="stat-label">{label}</span>
           {icon && <span className="stat-icon">{icon}</span>}
@@ -99,17 +110,39 @@ export function StatCard({
       </div>
       <style>{`
         .stat-card {
+          position: relative;
+          overflow: hidden;
           background: var(--color-bg-elevated);
-          border: 1px solid var(--color-border);
-          border-radius: var(--radius-md);
-          padding: 1.15rem 1.25rem;
-          box-shadow: var(--shadow-sm);
+          border: 1px solid rgba(226, 232, 240, 0.95);
+          border-radius: var(--radius-lg);
+          padding: 1.2rem 1.25rem 1.15rem;
+          box-shadow: var(--shadow-md);
+          transition: transform var(--transition), box-shadow var(--transition);
         }
-        .stat-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
-        .stat-label { font-size: 0.8rem; font-weight: 600; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.04em; }
-        .stat-icon { color: var(--color-accent); display: flex; }
-        .stat-value { font-size: 1.65rem; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
-        .stat-change { font-size: 0.8rem; margin-top: 0.35rem; font-weight: 500; }
+        .stat-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 12px 28px rgba(12, 25, 41, 0.1);
+        }
+        .stat-accent {
+          position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+          background: linear-gradient(180deg, var(--color-accent), #14b8a6);
+        }
+        .stat-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.55rem; }
+        .stat-label {
+          font-size: 0.72rem; font-weight: 700; color: var(--color-text-secondary);
+          text-transform: uppercase; letter-spacing: 0.06em;
+        }
+        .stat-icon {
+          width: 32px; height: 32px; border-radius: 8px;
+          background: var(--color-accent-soft); color: var(--color-accent);
+          display: flex; align-items: center; justify-content: center;
+        }
+        .stat-value {
+          font-family: var(--font-display);
+          font-size: 1.7rem; font-weight: 700; letter-spacing: -0.02em;
+          font-variant-numeric: tabular-nums;
+        }
+        .stat-change { font-size: 0.8rem; margin-top: 0.4rem; font-weight: 600; }
         .stat-change.up { color: var(--color-success); }
         .stat-change.down { color: var(--color-danger); }
       `}</style>
@@ -137,8 +170,8 @@ export function SearchInput({
       />
       <style>{`
         .search-wrap { position: relative; min-width: 220px; }
-        .search-icon { position: absolute; left: 0.7rem; top: 50%; transform: translateY(-50%); color: var(--color-text-muted); pointer-events: none; }
-        .search-wrap .search-input { padding-left: 2.1rem; }
+        .search-icon { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--color-text-muted); pointer-events: none; }
+        .search-wrap .search-input { padding-left: 2.2rem; }
       `}</style>
     </div>
   );
@@ -155,16 +188,25 @@ export function EmptyState({
 }) {
   return (
     <div className="empty-state">
-      <Inbox size={40} strokeWidth={1.25} />
+      <div className="empty-icon"><Inbox size={28} strokeWidth={1.5} /></div>
       <h3>{title}</h3>
       <p>{description}</p>
       {action}
       <style>{`
         .empty-state {
           display: flex; flex-direction: column; align-items: center; justify-content: center;
-          gap: 0.5rem; padding: 3rem 1.5rem; text-align: center; color: var(--color-text-muted);
+          gap: 0.45rem; padding: 3rem 1.5rem; text-align: center; color: var(--color-text-muted);
         }
-        .empty-state h3 { color: var(--color-text); font-size: 1.05rem; margin-top: 0.5rem; }
+        .empty-icon {
+          width: 56px; height: 56px; border-radius: 14px;
+          background: var(--color-bg-muted); color: var(--color-text-secondary);
+          display: flex; align-items: center; justify-content: center;
+          margin-bottom: 0.35rem;
+        }
+        .empty-state h3 {
+          color: var(--color-text); font-family: var(--font-display);
+          font-size: 1.1rem; margin-top: 0.15rem;
+        }
         .empty-state p { font-size: 0.875rem; max-width: 280px; }
       `}</style>
     </div>
@@ -209,10 +251,14 @@ export function Pagination({
           padding-top: 1rem; font-size: 0.85rem; color: var(--color-text-secondary);
         }
         .pagination button {
-          padding: 0.35rem 0.75rem; border: 1px solid var(--color-border);
-          border-radius: var(--radius-sm); background: white; font-weight: 500;
+          padding: 0.4rem 0.85rem; border: 1px solid var(--color-border);
+          border-radius: var(--radius-sm); background: white; font-weight: 600;
+          transition: background var(--transition), border-color var(--transition);
         }
-        .pagination button:hover:not(:disabled) { background: var(--color-bg-muted); }
+        .pagination button:hover:not(:disabled) {
+          background: var(--color-bg-muted);
+          border-color: var(--color-border-strong);
+        }
         .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
       `}</style>
     </div>

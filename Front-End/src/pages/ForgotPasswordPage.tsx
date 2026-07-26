@@ -12,7 +12,7 @@ export function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
 
-  if (isAuthenticated) return <Navigate to="/dashboard" replace />;
+  if (isAuthenticated) return <Navigate to="/modules" replace />;
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -34,59 +34,73 @@ export function ForgotPasswordPage() {
   };
 
   return (
-    <div className="login-page">
-      <div className="login-bg" />
-      <div className="login-card">
-        <div className="login-brand">
-          <div className="login-mark">F</div>
-          <h1>FinStock</h1>
-          <p>Forgot Password</p>
-        </div>
+    <div className="forgot-page">
+      <div className="forgot-bg" aria-hidden="true">
+        <div className="forgot-orb forgot-orb-a" />
+        <div className="forgot-orb forgot-orb-b" />
+        <div className="forgot-grid" />
+      </div>
 
-        {sent ? (
-          <div className="forgot-success">
-            <div className="success-icon">
-              <MailCheck size={28} />
+      <div className="forgot-shell">
+        <aside className="forgot-hero">
+          <div className="forgot-mark">F</div>
+          <p className="forgot-kicker">Account recovery</p>
+          <h1 className="forgot-brand-title">FinStock</h1>
+          <p className="forgot-hero-copy">
+            We will email you a secure link so you can set a new password and get back to work.
+          </p>
+        </aside>
+
+        <div className="forgot-card">
+          {sent ? (
+            <div className="forgot-success">
+              <div className="success-icon">
+                <MailCheck size={28} />
+              </div>
+              <h2>Check your email</h2>
+              <p>
+                If an account exists for <strong>{email}</strong>, you will receive a password reset
+                link shortly.
+              </p>
+              <Link to="/login" className="back-login">
+                <ArrowLeft size={16} /> Back to sign in
+              </Link>
             </div>
-            <h2>Check your email</h2>
-            <p>
-              If an account exists for <strong>{email}</strong>, you will receive a password reset link shortly.
-            </p>
-            <Link to="/login" className="back-login">
-              <ArrowLeft size={16} /> Back to Login
-            </Link>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="login-form" noValidate>
-            <p className="forgot-copy">
-              Enter the email associated with your account and we will send you a reset link.
-            </p>
+          ) : (
+            <>
+              <div className="forgot-card-header">
+                <h2>Forgot password</h2>
+                <p>Enter your email and we will send a reset link</p>
+              </div>
 
-            <Field label="Email" htmlFor="forgot-email" error={error || undefined}>
-              <Input
-                id="forgot-email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@restaurant.com"
-                autoComplete="email"
-                error={!!error}
-              />
-            </Field>
+              <form onSubmit={handleSubmit} className="forgot-form" noValidate>
+                <Field label="Email" htmlFor="forgot-email" error={error || undefined}>
+                  <Input
+                    id="forgot-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@restaurant.com"
+                    autoComplete="email"
+                    error={!!error}
+                  />
+                </Field>
 
-            <Button type="submit" size="lg" loading={loading} style={{ width: '100%' }}>
-              Send Reset Link
-            </Button>
+                <Button type="submit" size="lg" loading={loading} style={{ width: '100%' }}>
+                  Send reset link
+                </Button>
 
-            <Link to="/login" className="forgot-link">
-              <ArrowLeft size={14} style={{ display: 'inline', verticalAlign: 'middle' }} /> Back to Login
-            </Link>
-          </form>
-        )}
+                <Link to="/login" className="forgot-link">
+                  <ArrowLeft size={14} /> Back to sign in
+                </Link>
+              </form>
+            </>
+          )}
+        </div>
       </div>
 
       <style>{`
-        .login-page {
+        .forgot-page {
           min-height: 100vh;
           display: flex;
           align-items: center;
@@ -95,53 +109,119 @@ export function ForgotPasswordPage() {
           position: relative;
           overflow: hidden;
         }
-        .login-bg {
+        .forgot-bg {
+          position: absolute; inset: 0; z-index: 0;
+          background: linear-gradient(155deg, #0c1929 0%, #123048 42%, #0f766e 120%);
+        }
+        .forgot-orb {
+          position: absolute;
+          border-radius: 50%;
+          filter: blur(64px);
+          opacity: 0.42;
+          animation: forgot-drift 16s ease-in-out infinite alternate;
+        }
+        .forgot-orb-a {
+          width: 420px; height: 420px;
+          top: -120px; left: -80px;
+          background: #14b8a6;
+        }
+        .forgot-orb-b {
+          width: 340px; height: 340px;
+          bottom: -60px; right: -40px;
+          background: #1e4976;
+          animation-delay: -5s;
+        }
+        .forgot-grid {
           position: absolute; inset: 0;
-          background:
-            radial-gradient(ellipse 80% 60% at 20% 20%, rgba(15, 118, 110, 0.18), transparent),
-            radial-gradient(ellipse 70% 50% at 80% 80%, rgba(12, 25, 41, 0.12), transparent),
-            linear-gradient(160deg, #e8eef3 0%, #dce5ec 45%, #eef1f4 100%);
+          background-image:
+            linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+          background-size: 44px 44px;
+          mask-image: radial-gradient(ellipse 75% 65% at 40% 40%, black, transparent);
         }
-        .login-card {
+        @keyframes forgot-drift {
+          from { transform: translate(0, 0) scale(1); }
+          to { transform: translate(18px, 14px) scale(1.06); }
+        }
+        @keyframes forgot-rise {
+          from { opacity: 0; transform: translateY(18px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        .forgot-shell {
           position: relative;
+          z-index: 1;
           width: 100%;
-          max-width: 420px;
-          background: var(--color-bg-elevated);
-          border-radius: var(--radius-lg);
-          box-shadow: var(--shadow-lg);
-          border: 1px solid var(--color-border);
-          padding: 2.25rem 2rem;
+          max-width: 920px;
+          display: grid;
+          grid-template-columns: 1.05fr 0.95fr;
+          gap: 2rem;
+          align-items: center;
         }
-        .login-brand {
-          text-align: center;
-          margin-bottom: 1.75rem;
+        .forgot-hero {
+          color: white;
+          animation: forgot-rise 0.55s ease both;
         }
-        .login-mark {
-          width: 52px; height: 52px; margin: 0 auto 0.85rem;
-          border-radius: 12px;
-          background: var(--color-sidebar);
+        .forgot-mark {
+          width: 58px; height: 58px;
+          border-radius: 14px;
+          background: #0f766e;
           color: white;
           font-family: var(--font-display);
-          font-size: 1.5rem; font-weight: 700;
-          display: flex; align-items: center; justify-content: center;
-        }
-        .login-brand h1 {
-          font-family: var(--font-display);
-          font-size: 1.75rem;
+          font-size: 1.7rem;
           font-weight: 700;
-          letter-spacing: -0.02em;
+          display: flex; align-items: center; justify-content: center;
+          margin-bottom: 1.25rem;
+          box-shadow: 0 12px 28px rgba(15, 118, 110, 0.4);
         }
-        .login-brand p {
-          color: var(--color-text-secondary);
-          font-size: 0.9rem;
-          margin-top: 0.25rem;
+        .forgot-kicker {
+          font-size: 0.78rem;
+          font-weight: 600;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: rgba(204, 251, 241, 0.78);
+          margin-bottom: 0.55rem;
         }
-        .login-form { display: flex; flex-direction: column; gap: 1rem; }
-        .forgot-copy {
+        .forgot-brand-title {
+          font-family: var(--font-display);
+          font-size: clamp(2.6rem, 5vw, 3.6rem);
+          font-weight: 700;
+          letter-spacing: -0.03em;
+          line-height: 1;
+          margin: 0 0 0.9rem;
+        }
+        .forgot-hero-copy {
+          max-width: 22rem;
+          color: rgba(226, 232, 240, 0.78);
+          font-size: 1.02rem;
+          line-height: 1.55;
+          margin: 0;
+        }
+
+        .forgot-card {
+          background: rgba(255,255,255,0.97);
+          border-radius: 18px;
+          border: 1px solid rgba(255,255,255,0.35);
+          padding: 2rem 1.85rem 1.65rem;
+          box-shadow: 0 16px 40px rgba(8, 20, 35, 0.28);
+          animation: forgot-rise 0.6s ease 0.1s both;
+        }
+        .forgot-card-header { margin-bottom: 1.25rem; }
+        .forgot-card-header h2 {
+          font-family: var(--font-display);
+          font-size: 1.5rem;
+          font-weight: 700;
+          margin: 0 0 0.3rem;
+        }
+        .forgot-card-header p {
+          margin: 0;
+          color: #64748b;
           font-size: 0.9rem;
-          color: var(--color-text-secondary);
-          line-height: 1.5;
-          margin-bottom: 0.25rem;
+        }
+        .forgot-form {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
         }
         .forgot-link {
           text-align: center;
@@ -155,40 +235,59 @@ export function ForgotPasswordPage() {
           gap: 0.35rem;
         }
         .forgot-link:hover { text-decoration: underline; }
+
         .forgot-success {
           text-align: center;
           display: flex;
           flex-direction: column;
           align-items: center;
           gap: 0.75rem;
+          padding: 0.5rem 0;
         }
         .success-icon {
           width: 56px; height: 56px; border-radius: 14px;
           background: var(--color-accent-soft);
           color: var(--color-accent);
           display: flex; align-items: center; justify-content: center;
-          margin-bottom: 0.25rem;
         }
         .forgot-success h2 {
-          font-size: 1.2rem;
+          font-family: var(--font-display);
+          font-size: 1.35rem;
           font-weight: 700;
+          margin: 0;
         }
         .forgot-success p {
           font-size: 0.9rem;
           color: var(--color-text-secondary);
           line-height: 1.55;
           max-width: 320px;
+          margin: 0;
         }
         .back-login {
           display: inline-flex;
           align-items: center;
           gap: 0.35rem;
-          margin-top: 0.75rem;
+          margin-top: 0.5rem;
           color: var(--color-accent);
           font-weight: 600;
           font-size: 0.9rem;
         }
         .back-login:hover { text-decoration: underline; }
+
+        @media (max-width: 820px) {
+          .forgot-shell {
+            grid-template-columns: 1fr;
+            max-width: 420px;
+            gap: 1.5rem;
+          }
+          .forgot-hero { text-align: center; }
+          .forgot-mark { margin-left: auto; margin-right: auto; }
+          .forgot-hero-copy { margin-left: auto; margin-right: auto; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .forgot-orb, .forgot-hero, .forgot-card { animation: none !important; }
+        }
       `}</style>
     </div>
   );

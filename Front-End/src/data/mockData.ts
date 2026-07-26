@@ -17,10 +17,38 @@ import type {
 } from '../types';
 
 export const mockUsers: User[] = [
-  { id: '1', name: 'John Smith', email: 'john@restaurant.com', role: 'Owner', status: 'Active' },
-  { id: '2', name: 'Sarah Jones', email: 'sarah@restaurant.com', role: 'Manager', status: 'Active' },
-  { id: '3', name: 'Mike Chen', email: 'mike@restaurant.com', role: 'Accountant', status: 'Active' },
-  { id: '4', name: 'Emma Wilson', email: 'emma@restaurant.com', role: 'Staff', status: 'Inactive' },
+  {
+    id: '1',
+    name: 'John Smith',
+    email: 'john@restaurant.com',
+    role: 'Owner',
+    status: 'Active',
+    modules: ['core', 'hmrc', 'payroll', 'ai'],
+  },
+  {
+    id: '2',
+    name: 'Sarah Jones',
+    email: 'sarah@restaurant.com',
+    role: 'Manager',
+    status: 'Active',
+    modules: ['core'],
+  },
+  {
+    id: '3',
+    name: 'Mike Chen',
+    email: 'mike@restaurant.com',
+    role: 'Accountant',
+    status: 'Active',
+    modules: ['core', 'hmrc'],
+  },
+  {
+    id: '4',
+    name: 'Emma Wilson',
+    email: 'emma@restaurant.com',
+    role: 'Staff',
+    status: 'Inactive',
+    modules: ['core'],
+  },
 ];
 
 export const mockProducts: Product[] = [

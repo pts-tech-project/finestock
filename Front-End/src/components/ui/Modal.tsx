@@ -35,19 +35,21 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: M
       <style>{`
         .modal-overlay {
           position: fixed; inset: 0; z-index: 1000;
-          background: rgba(15, 23, 42, 0.5);
+          background: rgba(12, 25, 41, 0.55);
+          backdrop-filter: blur(4px);
           display: flex; align-items: center; justify-content: center;
           padding: 1rem;
-          animation: fadeIn 0.15s ease;
+          animation: fadeIn 0.18s ease;
         }
         .modal {
           background: var(--color-bg-elevated);
           border-radius: var(--radius-lg);
-          box-shadow: var(--shadow-lg);
+          box-shadow: 0 20px 48px rgba(8, 20, 35, 0.28);
           width: 100%;
           max-height: 90vh;
           display: flex; flex-direction: column;
-          animation: scaleIn 0.2s ease;
+          animation: scaleIn 0.22s ease;
+          border: 1px solid rgba(226, 232, 240, 0.9);
         }
         .modal-sm { max-width: 400px; }
         .modal-md { max-width: 560px; }
@@ -57,7 +59,12 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: M
           padding: 1.15rem 1.35rem;
           border-bottom: 1px solid var(--color-border);
         }
-        .modal-header h2 { font-size: 1.1rem; font-weight: 700; }
+        .modal-header h2 {
+          font-family: var(--font-display);
+          font-size: 1.2rem;
+          font-weight: 700;
+          letter-spacing: -0.015em;
+        }
         .modal-close { color: var(--color-text-muted); display: flex; padding: 0.25rem; border-radius: 4px; }
         .modal-close:hover { background: var(--color-bg-muted); color: var(--color-text); }
         .modal-body { padding: 1.35rem; overflow-y: auto; }

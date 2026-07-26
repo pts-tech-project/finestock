@@ -28,15 +28,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (password.length < 4) {
       return { ok: false, error: 'Password must be at least 4 characters.' };
     }
-    const found = mockUsers.find((u) => u.email.toLowerCase() === email.toLowerCase()) ?? mockUsers[0];
+    const found = mockUsers.find((u) => u.email.toLowerCase() === email.toLowerCase());
+    if (!found) {
+      return { ok: false, error: 'No account found for that email.' };
+    }
+    if (found.status !== 'Active') {
+      return { ok: false, error: 'This account is inactive.' };
+    }
     setUser(found);
     localStorage.setItem('finstock_user', JSON.stringify(found));
+    localStorage.removeItem('finstock_active_module');
     return { ok: true };
   }, []);
 
   const logout = useCallback(() => {
     setUser(null);
     localStorage.removeItem('finstock_user');
+    localStorage.removeItem('finstock_active_module');
   }, []);
 
   return (

@@ -36,19 +36,22 @@ export function Input({ error, className = '', ...props }: InputProps) {
       <style>{`
         .input {
           width: 100%;
-          padding: 0.55rem 0.75rem;
+          padding: 0.6rem 0.8rem;
           border: 1px solid var(--color-border);
           border-radius: var(--radius-sm);
           background: var(--color-bg-elevated);
           color: var(--color-text);
-          transition: border-color var(--transition), box-shadow var(--transition);
+          transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
         }
+        .input:hover { border-color: var(--color-border-strong); }
         .input:focus {
           outline: none;
           border-color: var(--color-accent);
-          box-shadow: 0 0 0 3px var(--color-accent-soft);
+          box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.14);
+          background: #fff;
         }
         .input-error { border-color: var(--color-danger); }
+        .input-error:focus { box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12); }
         .input::placeholder { color: var(--color-text-muted); }
       `}</style>
     </>

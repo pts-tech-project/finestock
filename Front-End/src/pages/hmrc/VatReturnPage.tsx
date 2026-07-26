@@ -1,14 +1,18 @@
 import { useState } from 'react';
-import { CheckCircle2, Link2 } from 'lucide-react';
-import { Card, StatCard, Badge, formatCurrency } from '../components/ui/Card';
-import { DataTable, type Column } from '../components/ui/DataTable';
-import { Button } from '../components/ui/Button';
-import { ConfirmDialog } from '../components/ui/Modal';
-import { useToast } from '../context/ToastContext';
-import { mockVatReturns } from '../data/mockData';
-import type { VatReturn } from '../types';
+import { CheckCircle2, Link2, ExternalLink } from 'lucide-react';
+import { Card, StatCard, Badge, formatCurrency } from '../../components/ui/Card';
+import { DataTable, type Column } from '../../components/ui/DataTable';
+import { Button } from '../../components/ui/Button';
+import { ConfirmDialog } from '../../components/ui/Modal';
+import { useToast } from '../../context/ToastContext';
+import { mockVatReturns } from '../../data/mockData';
+import type { VatReturn } from '../../types';
 
-export function HmrcPage() {
+/**
+ * Guided by GOV.UK VAT browse:
+ * https://www.gov.uk/browse/tax/vat
+ */
+export function VatReturnPage() {
   const { toast } = useToast();
   const [connected, setConnected] = useState(true);
   const [returns, setReturns] = useState(mockVatReturns);
@@ -73,9 +77,16 @@ export function HmrcPage() {
     <div className="page">
       <div className="page-header">
         <div>
-          <h1 className="page-title">HMRC VAT</h1>
-          <p className="page-subtitle">Connect and submit Making Tax Digital VAT returns</p>
+          <h1 className="page-title">VAT Return</h1>
+          <p className="page-subtitle">
+            Charge, reclaim and submit VAT — including Making Tax Digital returns
+          </p>
         </div>
+        <a href="https://www.gov.uk/browse/tax/vat" target="_blank" rel="noreferrer">
+          <Button variant="outline" size="sm">
+            GOV.UK VAT <ExternalLink size={14} />
+          </Button>
+        </a>
       </div>
 
       <div className="grid-2">

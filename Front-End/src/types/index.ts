@@ -1,11 +1,24 @@
 export type UserRole = 'Owner' | 'Manager' | 'Accountant' | 'Staff';
 
+export type ModuleId = 'core' | 'hmrc' | 'payroll' | 'ai';
+
+export interface AppModule {
+  id: ModuleId;
+  name: string;
+  description: string;
+  /** Included in base purchase vs requires additional payment */
+  billing: 'included' | 'add-on';
+  homePath: string;
+}
+
 export interface User {
   id: string;
   name: string;
   email: string;
   role: UserRole;
   status: 'Active' | 'Inactive';
+  /** Modules unlocked for this account’s subscription */
+  modules: ModuleId[];
 }
 
 export interface Product {
