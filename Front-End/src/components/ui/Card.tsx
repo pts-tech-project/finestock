@@ -26,7 +26,7 @@ export function Badge({
         .badge-warning { background: var(--color-warning-bg); color: var(--color-warning); }
         .badge-danger { background: var(--color-danger-bg); color: var(--color-danger); }
         .badge-info { background: var(--color-info-bg); color: var(--color-info); }
-        .badge-neutral { background: #f1f5f9; color: #475569; }
+        .badge-neutral { background: var(--color-bg-muted); color: var(--color-text-secondary); }
       `}</style>
     </>
   );
@@ -252,7 +252,8 @@ export function Pagination({
         }
         .pagination button {
           padding: 0.4rem 0.85rem; border: 1px solid var(--color-border);
-          border-radius: var(--radius-sm); background: white; font-weight: 600;
+          border-radius: var(--radius-sm); background: var(--color-bg-elevated); font-weight: 600;
+          color: var(--color-text);
           transition: background var(--transition), border-color var(--transition);
         }
         .pagination button:hover:not(:disabled) {

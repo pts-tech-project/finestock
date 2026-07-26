@@ -162,3 +162,85 @@ export interface NavItem {
   icon?: string;
   children?: { label: string; path: string }[];
 }
+
+/* ── Payroll module ─────────────────────────────────────────── */
+
+export type EmploymentType = 'Full-time' | 'Part-time' | 'Casual';
+export type PayType = 'Salary' | 'Hourly';
+export type PayFrequency = 'Weekly' | 'Fortnightly' | 'Monthly';
+export type PayrollEmployeeStatus = 'Active' | 'Inactive';
+export type TimesheetStatus = 'Draft' | 'Submitted' | 'Approved';
+export type PayrollRunStatus = 'Draft' | 'Calculated' | 'Approved' | 'Paid';
+export type DashboardPayrollStatus = 'Draft' | 'Approved' | 'Completed';
+
+export interface PayrollEmployee {
+  id: string;
+  employeeId: string;
+  name: string;
+  position: string;
+  startDate: string;
+  employmentType: EmploymentType;
+  payType: PayType;
+  salaryOrRate: number;
+  payFrequency: PayFrequency;
+  taxCode: string;
+  niNumber: string;
+  bankAccount: string;
+  pensionEnrolled: boolean;
+  status: PayrollEmployeeStatus;
+}
+
+export interface TimesheetEntry {
+  id: string;
+  employeeId: string;
+  employeeName: string;
+  date: string;
+  hoursWorked: number;
+  overtimeHours: number;
+  notes: string;
+  status: TimesheetStatus;
+}
+
+export interface PayrollLineItem {
+  employeeId: string;
+  employeeName: string;
+  payBasis: string;
+  grossPay: number;
+  payeTax: number;
+  employeeNi: number;
+  pension: number;
+  otherDeductions: number;
+  netPay: number;
+}
+
+export interface PayrollRun {
+  id: string;
+  period: string;
+  periodStart: string;
+  periodEnd: string;
+  payDate: string;
+  employeeCount: number;
+  grossPay: number;
+  totalTax: number;
+  totalNi: number;
+  totalPension: number;
+  netPay: number;
+  status: PayrollRunStatus;
+  lines: PayrollLineItem[];
+}
+
+export interface PayslipRecord {
+  id: string;
+  payrollRunId: string;
+  employeeId: string;
+  employeeName: string;
+  period: string;
+  grossPay: number;
+  payeTax: number;
+  employeeNi: number;
+  pension: number;
+  otherDeductions: number;
+  netPay: number;
+  status: 'Ready' | 'Sent';
+}
+

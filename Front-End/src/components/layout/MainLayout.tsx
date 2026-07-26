@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Outlet, useNavigate, Link } from 'react-router-dom';
 import { Menu, Bell, LogOut, User, LayoutGrid } from 'lucide-react';
 import { Sidebar } from './Sidebar';
+import { ThemeToggle } from '../ThemeToggle';
+import { PoweredByFooter } from '../PoweredByFooter';
 import { useAuth } from '../../context/AuthContext';
 import { useModules } from '../../context/ModuleContext';
 import { APP_MODULES } from '../../data/modules';
@@ -39,6 +41,7 @@ export function MainLayout() {
             <LayoutGrid size={16} />
             <span>Modules</span>
           </Link>
+          <ThemeToggle />
           <button type="button" className="icon-btn" aria-label="Notifications">
             <Bell size={18} />
           </button>
@@ -56,6 +59,7 @@ export function MainLayout() {
         <main className="content">
           <Outlet />
         </main>
+        <PoweredByFooter />
       </div>
 
       <style>{`
@@ -77,14 +81,14 @@ export function MainLayout() {
           inset: 0;
           z-index: 0;
           background:
-            radial-gradient(ellipse 70% 45% at 100% -10%, rgba(15, 118, 110, 0.12), transparent 55%),
-            radial-gradient(ellipse 50% 40% at 0% 100%, rgba(12, 25, 41, 0.06), transparent 50%);
+            radial-gradient(ellipse 70% 45% at 100% -10%, var(--color-atmosphere-a), transparent 55%),
+            radial-gradient(ellipse 50% 40% at 0% 100%, var(--color-atmosphere-b), transparent 50%);
         }
         .topbar {
           height: var(--header-height);
-          background: rgba(255, 255, 255, 0.86);
+          background: color-mix(in srgb, var(--color-bg-elevated) 88%, transparent);
           backdrop-filter: blur(12px);
-          border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+          border-bottom: 1px solid var(--color-border);
           display: flex;
           align-items: center;
           gap: 0.75rem;
@@ -133,12 +137,12 @@ export function MainLayout() {
         }
         .user-avatar {
           width: 34px; height: 34px; border-radius: 9px;
-          background: linear-gradient(145deg, #0f766e, #0c1929);
+          background: linear-gradient(145deg, var(--color-accent), var(--color-sidebar));
           color: white;
           display: flex; align-items: center; justify-content: center;
         }
         .user-meta { display: flex; flex-direction: column; line-height: 1.2; }
-        .user-name { font-size: 0.85rem; font-weight: 700; }
+        .user-name { font-size: 0.85rem; font-weight: 700; color: var(--color-text); }
         .user-role { font-size: 0.7rem; color: var(--color-text-muted); }
         .content {
           position: relative;

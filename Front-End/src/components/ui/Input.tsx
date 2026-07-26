@@ -48,7 +48,7 @@ export function Input({ error, className = '', ...props }: InputProps) {
           outline: none;
           border-color: var(--color-accent);
           box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.14);
-          background: #fff;
+          background: var(--color-bg-elevated);
         }
         .input-error { border-color: var(--color-danger); }
         .input-error:focus { box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12); }

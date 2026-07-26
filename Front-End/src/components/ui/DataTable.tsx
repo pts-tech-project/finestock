@@ -86,7 +86,7 @@ export function DataTable<T extends object>({
           color: var(--color-text-secondary);
           border-bottom: 1px solid var(--color-border);
           white-space: nowrap;
-          background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+          background: linear-gradient(180deg, var(--color-bg-muted) 0%, var(--color-table-header) 100%);
         }
         .data-table th.sortable { cursor: pointer; user-select: none; }
         .data-table th.sortable:hover { color: var(--color-text); }
@@ -98,8 +98,9 @@ export function DataTable<T extends object>({
           border-bottom: 1px solid var(--color-border);
           vertical-align: middle;
           transition: background var(--transition);
+          color: var(--color-text);
         }
-        .data-table tbody tr:hover td { background: rgba(204, 251, 241, 0.28); }
+        .data-table tbody tr:hover td { background: var(--color-table-hover); }
         .data-table tbody tr:last-child td { border-bottom: none; }
       `}</style>
     </div>

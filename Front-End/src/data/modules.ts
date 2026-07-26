@@ -84,7 +84,12 @@ export const hmrcNavItems: NavItem[] = [
 ];
 
 export const payrollNavItems: NavItem[] = [
-  { label: 'Payroll Overview', path: '/payroll', icon: 'payroll' },
+  { label: 'Dashboard', path: '/payroll', icon: 'dashboard' },
+  { label: 'Employees', path: '/payroll/employees', icon: 'employees' },
+  { label: 'Timesheets', path: '/payroll/timesheets', icon: 'timesheet' },
+  { label: 'Payroll Run', path: '/payroll/runs', icon: 'payroll' },
+  { label: 'Payslips', path: '/payroll/payslips', icon: 'payslip' },
+  { label: 'Reports', path: '/payroll/reports', icon: 'reports' },
 ];
 
 export const aiNavItems: NavItem[] = [

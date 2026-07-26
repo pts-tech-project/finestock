@@ -18,6 +18,9 @@ import {
   UsersRound,
   Sparkles,
   ArrowLeftRight,
+  Clock3,
+  ScrollText,
+  UserRound,
 } from 'lucide-react';
 import { useModules } from '../../context/ModuleContext';
 import { APP_MODULES, navForModule } from '../../data/modules';
@@ -34,6 +37,9 @@ const icons: Record<string, ReactNode> = {
   vat: <FileText size={18} />,
   paye: <Wallet size={18} />,
   payroll: <UsersRound size={18} />,
+  employees: <UserRound size={18} />,
+  timesheet: <Clock3 size={18} />,
+  payslip: <ScrollText size={18} />,
   ai: <Sparkles size={18} />,
   settings: <Settings size={18} />,
   audit: <ClipboardList size={18} />,

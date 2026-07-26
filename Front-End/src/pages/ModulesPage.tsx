@@ -15,6 +15,8 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useModules, DEMO_DAYS } from '../context/ModuleContext';
 import { useToast } from '../context/ToastContext';
+import { ThemeToggle } from '../components/ThemeToggle';
+import { PoweredByFooter } from '../components/PoweredByFooter';
 import { APP_MODULES } from '../data/modules';
 import type { ModuleId } from '../types';
 import { Modal } from '../components/ui/Modal';
@@ -131,10 +133,13 @@ export function ModulesPage() {
             <span>{user?.role}</span>
           </div>
         </div>
-        <button type="button" className="modules-logout" onClick={handleLogout}>
-          <LogOut size={16} />
-          <span>Sign out</span>
-        </button>
+        <div className="modules-top-actions">
+          <ThemeToggle className="modules-theme" />
+          <button type="button" className="modules-logout" onClick={handleLogout}>
+            <LogOut size={16} />
+            <span>Sign out</span>
+          </button>
+        </div>
       </header>
 
       <main className="modules-main">
@@ -263,6 +268,8 @@ export function ModulesPage() {
         </section>
       </main>
 
+      <PoweredByFooter variant="on-dark" />
+
       <Modal
         open={!!demoModuleId}
         onClose={() => setDemoModuleId(null)}
@@ -322,6 +329,11 @@ export function ModulesPage() {
           flex-direction: column;
           overflow: hidden;
         }
+        .modules-page .pts-footer {
+          flex-shrink: 0;
+          padding-top: 0.35rem;
+          padding-bottom: 0.65rem;
+        }
 
         .modules-bg {
           position: absolute; inset: 0; z-index: 0;
@@ -371,6 +383,20 @@ export function ModulesPage() {
           align-items: center;
           justify-content: space-between;
           padding: clamp(0.55rem, 1.4vh, 1rem) clamp(0.85rem, 2.5vw, 1.75rem);
+        }
+        .modules-top-actions {
+          display: flex;
+          align-items: center;
+          gap: 0.55rem;
+        }
+        .modules-top-actions .theme-toggle {
+          border-color: rgba(255,255,255,0.18);
+          background: rgba(255,255,255,0.08);
+          color: rgba(255,255,255,0.85);
+        }
+        .modules-top-actions .theme-toggle:hover {
+          background: rgba(255,255,255,0.16);
+          color: white;
         }
         .modules-user-chip {
           display: flex;

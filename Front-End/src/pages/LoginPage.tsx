@@ -2,6 +2,8 @@ import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useModules } from '../context/ModuleContext';
+import { ThemeToggle } from '../components/ThemeToggle';
+import { PoweredByFooter } from '../components/PoweredByFooter';
 import { Button } from '../components/ui/Button';
 import { Field, Input } from '../components/ui/Input';
 
@@ -37,6 +39,10 @@ export function LoginPage() {
         <div className="login-orb login-orb-b" />
         <div className="login-orb login-orb-c" />
         <div className="login-grid-pattern" />
+      </div>
+
+      <div className="login-theme">
+        <ThemeToggle />
       </div>
 
       <div className="login-shell">
@@ -101,15 +107,22 @@ export function LoginPage() {
         </div>
       </div>
 
+      <PoweredByFooter variant="on-dark" />
+
       <style>{`
         .login-page {
           min-height: 100vh;
           display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
-          padding: 1.5rem;
+          padding: 1.5rem 1.5rem 0;
           position: relative;
           overflow: hidden;
+        }
+        .login-page .pts-footer {
+          width: 100%;
+          margin-top: auto;
         }
 
         .login-bg {
@@ -168,6 +181,22 @@ export function LoginPage() {
           40% { transform: translateX(6px); }
           60% { transform: translateX(-4px); }
           80% { transform: translateX(4px); }
+        }
+
+        .login-theme {
+          position: absolute;
+          top: 1.15rem;
+          right: 1.15rem;
+          z-index: 2;
+        }
+        .login-theme .theme-toggle {
+          border-color: rgba(255,255,255,0.18);
+          background: rgba(255,255,255,0.08);
+          color: rgba(255,255,255,0.85);
+        }
+        .login-theme .theme-toggle:hover {
+          background: rgba(255,255,255,0.16);
+          color: white;
         }
 
         .login-shell {

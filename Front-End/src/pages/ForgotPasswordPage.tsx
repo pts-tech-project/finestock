@@ -2,6 +2,8 @@ import { useState, type FormEvent } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { ArrowLeft, MailCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { ThemeToggle } from '../components/ThemeToggle';
+import { PoweredByFooter } from '../components/PoweredByFooter';
 import { Button } from '../components/ui/Button';
 import { Field, Input } from '../components/ui/Input';
 
@@ -39,6 +41,10 @@ export function ForgotPasswordPage() {
         <div className="forgot-orb forgot-orb-a" />
         <div className="forgot-orb forgot-orb-b" />
         <div className="forgot-grid" />
+      </div>
+
+      <div className="forgot-theme">
+        <ThemeToggle />
       </div>
 
       <div className="forgot-shell">
@@ -99,15 +105,22 @@ export function ForgotPasswordPage() {
         </div>
       </div>
 
+      <PoweredByFooter variant="on-dark" />
+
       <style>{`
         .forgot-page {
           min-height: 100vh;
           display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
-          padding: 1.5rem;
+          padding: 1.5rem 1.5rem 0;
           position: relative;
           overflow: hidden;
+        }
+        .forgot-page .pts-footer {
+          width: 100%;
+          margin-top: auto;
         }
         .forgot-bg {
           position: absolute; inset: 0; z-index: 0;
@@ -146,6 +159,22 @@ export function ForgotPasswordPage() {
         @keyframes forgot-rise {
           from { opacity: 0; transform: translateY(18px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+
+        .forgot-theme {
+          position: absolute;
+          top: 1.15rem;
+          right: 1.15rem;
+          z-index: 2;
+        }
+        .forgot-theme .theme-toggle {
+          border-color: rgba(255,255,255,0.18);
+          background: rgba(255,255,255,0.08);
+          color: rgba(255,255,255,0.85);
+        }
+        .forgot-theme .theme-toggle:hover {
+          background: rgba(255,255,255,0.16);
+          color: white;
         }
 
         .forgot-shell {
