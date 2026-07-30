@@ -4,6 +4,7 @@ const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const companyRoutes = require('./routes/company.routes');
 const roleRoutes = require('./routes/role.routes');
+const supplierRoutes = require('./routes/supplier.routes');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -25,6 +26,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/company', companyRoutes);
 app.use('/api/roles', roleRoutes);
+app.use('/api/companies/:companyId/suppliers', supplierRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

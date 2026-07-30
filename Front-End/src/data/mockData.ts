@@ -98,10 +98,10 @@ export const mockSalesImports: SalesImport[] = [
 ];
 
 export const mockSuppliers: Supplier[] = [
-  { id: '1', name: 'Fresh Foods Ltd', contact: 'David Brown', email: 'david@freshfoods.co.uk', phone: '020 7123 4567', vatNumber: 'GB123456789', balance: 1250, status: 'Active', paymentTerms: 'Net 30' },
-  { id: '2', name: 'Dairy Direct', contact: 'Lisa Green', email: 'lisa@dairydirect.com', phone: '0161 987 6543', vatNumber: 'GB987654321', balance: 480, status: 'Active', paymentTerms: 'Net 14' },
-  { id: '3', name: 'Beverage Wholesale', contact: 'Tom Hughes', email: 'tom@bevwholesale.com', phone: '0113 555 1212', vatNumber: 'GB555121234', balance: 0, status: 'Active', paymentTerms: 'Net 30' },
-  { id: '4', name: 'Old Supplier Co', contact: 'Jane Doe', email: 'jane@oldsup.com', phone: '020 1111 2222', vatNumber: 'GB111222333', balance: 0, status: 'Inactive' },
+  { id: '1', supplierCode: 'SUP-001', name: 'Fresh Foods Ltd', contact: 'David Brown', email: 'david@freshfoods.co.uk', phone: '020 7123 4567', vatNumber: 'GB123456789', openingBalance: 1250, balance: 1250, status: 'Active', paymentTerms: 'Net 30' },
+  { id: '2', supplierCode: 'SUP-002', name: 'Dairy Direct', contact: 'Lisa Green', email: 'lisa@dairydirect.com', phone: '0161 987 6543', vatNumber: 'GB987654321', openingBalance: 480, balance: 480, status: 'Active', paymentTerms: 'Net 14' },
+  { id: '3', supplierCode: 'SUP-003', name: 'Beverage Wholesale', contact: 'Tom Hughes', email: 'tom@bevwholesale.com', phone: '0113 555 1212', vatNumber: 'GB555121234', openingBalance: 0, balance: 0, status: 'Active', paymentTerms: 'Net 30' },
+  { id: '4', supplierCode: 'SUP-004', name: 'Old Supplier Co', contact: 'Jane Doe', email: 'jane@oldsup.com', phone: '020 1111 2222', vatNumber: 'GB111222333', openingBalance: 0, balance: 0, status: 'Inactive' },
 ];
 
 export const mockPurchaseOrders: PurchaseOrder[] = [
