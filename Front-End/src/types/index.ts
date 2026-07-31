@@ -80,14 +80,16 @@ export interface SalesImport {
 
 export interface Supplier {
   id: string;
+  supplierCode: string;
   name: string;
-  contact: string;
-  email: string;
-  phone: string;
-  vatNumber: string;
+  contact: string | null;
+  email: string | null;
+  phone: string | null;
+  vatNumber: string | null;
+  openingBalance: number;
   balance: number;
   status: 'Active' | 'Inactive';
-  address?: string;
+  address?: string | null;
   paymentTerms?: string;
 }
 
