@@ -23,6 +23,7 @@ export const mockUsers: User[] = [
     email: 'john@restaurant.com',
     role: 'Owner',
     status: 'Active',
+    companyId: null,
     modules: ['core', 'hmrc', 'payroll', 'ai'],
   },
   {
@@ -31,6 +32,7 @@ export const mockUsers: User[] = [
     email: 'sarah@restaurant.com',
     role: 'Manager',
     status: 'Active',
+    companyId: null,
     modules: ['core'],
   },
   {
@@ -39,6 +41,7 @@ export const mockUsers: User[] = [
     email: 'mike@restaurant.com',
     role: 'Accountant',
     status: 'Active',
+    companyId: null,
     modules: ['core', 'hmrc'],
   },
   {
@@ -47,6 +50,7 @@ export const mockUsers: User[] = [
     email: 'emma@restaurant.com',
     role: 'Staff',
     status: 'Inactive',
+    companyId: null,
     modules: ['core'],
   },
 ];
@@ -92,9 +96,9 @@ export const mockDailySales: DailySale[] = [
 ];
 
 export const mockSalesImports: SalesImport[] = [
-  { id: '1', fileName: 'epos_sales_22072026.csv', uploadDate: '22/07/2026 09:15', records: 250, status: 'Success' },
-  { id: '2', fileName: 'epos_sales_21072026.xlsx', uploadDate: '21/07/2026 09:02', records: 230, status: 'Success' },
-  { id: '3', fileName: 'epos_sales_20072026.csv', uploadDate: '20/07/2026 09:30', records: 0, status: 'Failed' },
+  { id: '1', fileName: 'epos_sales_22072026.csv', uploadDate: '22/07/2026 09:15', records: 250, status: 'Success', method: 'csv' },
+  { id: '2', fileName: 'epos_sales_21072026.xlsx', uploadDate: '21/07/2026 09:02', records: 230, status: 'Success', method: 'csv' },
+  { id: '3', fileName: 'epos_sales_20072026.csv', uploadDate: '20/07/2026 09:30', records: 0, status: 'Failed', method: 'csv' },
 ];
 
 export const mockSuppliers: Supplier[] = [

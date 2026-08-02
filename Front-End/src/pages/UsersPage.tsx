@@ -98,6 +98,7 @@ export function UsersPage() {
           email: form.email,
           role: form.role,
           status: form.status,
+          companyId: null,
           modules: ['core'],
         },
         ...prev,
