@@ -6,11 +6,12 @@ import { Button } from '../../components/ui/Button';
 import { Field, Input } from '../../components/ui/Input';
 import { Modal } from '../../components/ui/Modal';
 import { useToast } from '../../context/ToastContext';
-import { mockDailySales } from '../../data/mockData';
+import { useDailySales } from '../../data/useSalesStore';
 import type { DailySale } from '../../types';
 
 export function DailySalesPage() {
   const { toast } = useToast();
+  const dailySales = useDailySales();
   const [search, setSearch] = useState('');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
@@ -21,7 +22,7 @@ export function DailySalesPage() {
   const pageSize = 5;
 
   const filtered = useMemo(() => {
-    let rows = [...mockDailySales];
+    let rows = [...dailySales];
     if (search) {
       rows = rows.filter((r) =>
         r.date.includes(search) || r.source.toLowerCase().includes(search.toLowerCase())
@@ -33,7 +34,7 @@ export function DailySalesPage() {
       return sortDir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
     });
     return rows;
-  }, [search, sortKey, sortDir]);
+  }, [dailySales, search, sortKey, sortDir]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const pageData = filtered.slice((page - 1) * pageSize, page * pageSize);
@@ -90,7 +91,7 @@ export function DailySalesPage() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Daily Sales</h1>
-          <p className="page-subtitle">Sales imported from EPOS</p>
+          <p className="page-subtitle">Sales imported from Square / EPOS</p>
         </div>
         <Button variant="outline" onClick={() => toast('CSV export started', 'info')}>
           <Download size={16} /> Export CSV
@@ -128,13 +129,41 @@ export function DailySalesPage() {
         footer={<Button onClick={() => setDetail(null)}>Close</Button>}
       >
         {detail && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-            <div><span className="text-muted">Transactions</span><div style={{ fontWeight: 700 }}>{detail.transactions}</div></div>
-            <div><span className="text-muted">Source</span><div style={{ fontWeight: 700 }}>{detail.source}</div></div>
-            <div><span className="text-muted">Gross Sales</span><div style={{ fontWeight: 700 }}>{formatCurrency(detail.grossSales)}</div></div>
-            <div><span className="text-muted">VAT</span><div style={{ fontWeight: 700 }}>{formatCurrency(detail.vat)}</div></div>
-            <div><span className="text-muted">Net Sales</span><div style={{ fontWeight: 700 }}>{formatCurrency(detail.netSales)}</div></div>
-            <div><span className="text-muted">Status</span><div><Badge variant="success">{detail.status}</Badge></div></div>
+          <div style={{ display: 'grid', gap: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div><span className="text-muted">Transactions</span><div style={{ fontWeight: 700 }}>{detail.transactions}</div></div>
+              <div><span className="text-muted">Source</span><div style={{ fontWeight: 700 }}>{detail.source}</div></div>
+              <div><span className="text-muted">Gross Sales</span><div style={{ fontWeight: 700 }}>{formatCurrency(detail.grossSales)}</div></div>
+              <div><span className="text-muted">VAT</span><div style={{ fontWeight: 700 }}>{formatCurrency(detail.vat)}</div></div>
+              <div><span className="text-muted">Net Sales</span><div style={{ fontWeight: 700 }}>{formatCurrency(detail.netSales)}</div></div>
+              <div><span className="text-muted">Status</span><div><Badge variant="success">{detail.status}</Badge></div></div>
+              {detail.averageOrder != null && (
+                <div><span className="text-muted">Average order</span><div style={{ fontWeight: 700 }}>{formatCurrency(detail.averageOrder)}</div></div>
+              )}
+              {detail.fees != null && detail.fees > 0 && (
+                <div><span className="text-muted">Fees</span><div style={{ fontWeight: 700 }}>{formatCurrency(detail.fees)}</div></div>
+              )}
+            </div>
+            {detail.categories && detail.categories.length > 0 && (
+              <table style={{ width: '100%', fontSize: '0.875rem' }}>
+                <thead>
+                  <tr>
+                    <th style={{ textAlign: 'left', padding: '0.4rem 0', color: 'var(--color-text-secondary)' }}>Category</th>
+                    <th style={{ textAlign: 'right', padding: '0.4rem 0', color: 'var(--color-text-secondary)' }}>Items</th>
+                    <th style={{ textAlign: 'right', padding: '0.4rem 0', color: 'var(--color-text-secondary)' }}>Net</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {detail.categories.map((c) => (
+                    <tr key={c.category}>
+                      <td style={{ padding: '0.4rem 0', borderTop: '1px solid var(--color-border)' }}>{c.category}</td>
+                      <td style={{ padding: '0.4rem 0', borderTop: '1px solid var(--color-border)', textAlign: 'right' }}>{c.itemsSold}</td>
+                      <td style={{ padding: '0.4rem 0', borderTop: '1px solid var(--color-border)', textAlign: 'right' }}>{formatCurrency(c.netSales)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         )}
       </Modal>

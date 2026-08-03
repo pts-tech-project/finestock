@@ -38,6 +38,7 @@ import { PayrollReportsPage } from './pages/payroll/PayrollReportsPage';
 import { AiPage } from './pages/AiPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { CompanyProfilePage } from './pages/CompanyProfilePage';
+import { ProfilePage } from './pages/ProfilePage';
 import { UsersPage } from './pages/UsersPage';
 import { AuditPage } from './pages/AuditPage';
 
@@ -71,7 +72,8 @@ export default function App() {
                       <Route path="/supplier-invoices" element={<SupplierInvoicesPage />} />
                       <Route path="/expenses" element={<ExpensesPage />} />
                       <Route path="/reports" element={<ReportsPage />} />
-                      <Route path="/settings" element={<Navigate to="/settings/company" replace />} />
+                      <Route path="/settings" element={<Navigate to="/settings/profile" replace />} />
+                      <Route path="/settings/profile" element={<ProfilePage />} />
                       <Route path="/settings/company" element={<CompanyProfilePage />} />
                       <Route path="/settings/users" element={<UsersPage />} />
                       <Route path="/settings/roles" element={<SettingsPage />} />

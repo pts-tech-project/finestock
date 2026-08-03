@@ -1,54 +1,181 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+  type ReactNode,
+} from 'react';
 import type { User } from '../types';
-import { mockUsers } from '../data/mockData';
+import {
+  ApiError,
+  clearToken,
+  getToken,
+  loginRequest,
+  mapAuthUser,
+  meRequest,
+  setToken,
+} from '../lib/authApi';
 
 interface AuthContextValue {
   user: User | null;
+  token: string | null;
+  permissions: Record<string, boolean>;
+  allowed: string[];
   isAuthenticated: boolean;
+  /** True while restoring session from stored JWT via /api/auth/me */
+  bootstrapping: boolean;
   login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
+  applySessionUser: (
+    userPayload: import('../lib/authApi').AuthUserPayload,
+    permissions?: Record<string, boolean>,
+    allowed?: string[],
+  ) => void;
+  hasPermission: (name: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+const USER_KEY = 'finstock_user';
+
+function persistSession(user: User, token: string) {
+  setToken(token);
+  localStorage.setItem(USER_KEY, JSON.stringify(user));
+  localStorage.removeItem('finstock_active_module');
+}
+
+function clearSession() {
+  clearToken();
+  localStorage.removeItem(USER_KEY);
+  localStorage.removeItem('finstock_active_module');
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem('finstock_user');
-    return saved ? (JSON.parse(saved) as User) : null;
-  });
+  const [user, setUser] = useState<User | null>(null);
+  const [token, setTokenState] = useState<string | null>(() => getToken());
+  const [permissions, setPermissions] = useState<Record<string, boolean>>({});
+  const [allowed, setAllowed] = useState<string[]>([]);
+  const [bootstrapping, setBootstrapping] = useState(() => Boolean(getToken()));
+
+  const logout = useCallback(() => {
+    setUser(null);
+    setTokenState(null);
+    setPermissions({});
+    setAllowed([]);
+    clearSession();
+  }, []);
+
+  useEffect(() => {
+    const existing = getToken();
+    if (!existing) {
+      setBootstrapping(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const res = await meRequest();
+        if (cancelled) return;
+        const mapped = mapAuthUser(res.data.user);
+        setUser(mapped);
+        setTokenState(existing);
+        setPermissions(res.data.permissions ?? {});
+        setAllowed(res.data.allowed ?? []);
+        localStorage.setItem(USER_KEY, JSON.stringify(mapped));
+      } catch {
+        if (cancelled) return;
+        clearSession();
+        setUser(null);
+        setTokenState(null);
+        setPermissions({});
+        setAllowed([]);
+      } finally {
+        if (!cancelled) setBootstrapping(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    await new Promise((r) => setTimeout(r, 600));
     if (!email || !password) {
       return { ok: false, error: 'Email and password are required.' };
     }
     if (!email.includes('@')) {
       return { ok: false, error: 'Please enter a valid email address.' };
     }
-    if (password.length < 4) {
-      return { ok: false, error: 'Password must be at least 4 characters.' };
+
+    try {
+      const res = await loginRequest(email.trim(), password);
+      const mapped = mapAuthUser(res.data.user);
+      persistSession(mapped, res.data.token);
+      setUser(mapped);
+      setTokenState(res.data.token);
+      setPermissions(res.data.permissions ?? {});
+      setAllowed(res.data.allowed ?? []);
+      return { ok: true };
+    } catch (err) {
+      const message =
+        err instanceof ApiError
+          ? err.message
+          : 'Login failed. Please try again.';
+      return { ok: false, error: message };
     }
-    const found = mockUsers.find((u) => u.email.toLowerCase() === email.toLowerCase());
-    if (!found) {
-      return { ok: false, error: 'No account found for that email.' };
-    }
-    if (found.status !== 'Active') {
-      return { ok: false, error: 'This account is inactive.' };
-    }
-    setUser(found);
-    localStorage.setItem('finstock_user', JSON.stringify(found));
-    localStorage.removeItem('finstock_active_module');
-    return { ok: true };
   }, []);
 
-  const logout = useCallback(() => {
-    setUser(null);
-    localStorage.removeItem('finstock_user');
-    localStorage.removeItem('finstock_active_module');
+  const hasPermission = useCallback(
+    (name: string) => Boolean(permissions[name]) || allowed.includes(name),
+    [permissions, allowed],
+  );
+
+  const refreshUser = useCallback(async () => {
+    const existing = getToken();
+    if (!existing) return;
+    const res = await meRequest();
+    const mapped = mapAuthUser(res.data.user);
+    setUser(mapped);
+    setPermissions(res.data.permissions ?? {});
+    setAllowed(res.data.allowed ?? []);
+    localStorage.setItem(USER_KEY, JSON.stringify(mapped));
   }, []);
+
+  const applySessionUser = useCallback(
+    (
+      userPayload: import('../lib/authApi').AuthUserPayload,
+      nextPermissions?: Record<string, boolean>,
+      nextAllowed?: string[],
+    ) => {
+      const mapped = mapAuthUser(userPayload);
+      setUser(mapped);
+      if (nextPermissions) setPermissions(nextPermissions);
+      if (nextAllowed) setAllowed(nextAllowed);
+      localStorage.setItem(USER_KEY, JSON.stringify(mapped));
+    },
+    [],
+  );
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        permissions,
+        allowed,
+        isAuthenticated: !!user && !!token,
+        bootstrapping,
+        login,
+        logout,
+        refreshUser,
+        applySessionUser,
+        hasPermission,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

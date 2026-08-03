@@ -23,6 +23,7 @@ export const mockUsers: User[] = [
     email: 'john@restaurant.com',
     role: 'Owner',
     status: 'Active',
+    companyId: null,
     modules: ['core', 'hmrc', 'payroll', 'ai'],
   },
   {
@@ -31,6 +32,7 @@ export const mockUsers: User[] = [
     email: 'sarah@restaurant.com',
     role: 'Manager',
     status: 'Active',
+    companyId: null,
     modules: ['core'],
   },
   {
@@ -39,6 +41,7 @@ export const mockUsers: User[] = [
     email: 'mike@restaurant.com',
     role: 'Accountant',
     status: 'Active',
+    companyId: null,
     modules: ['core', 'hmrc'],
   },
   {
@@ -47,6 +50,7 @@ export const mockUsers: User[] = [
     email: 'emma@restaurant.com',
     role: 'Staff',
     status: 'Inactive',
+    companyId: null,
     modules: ['core'],
   },
 ];
@@ -92,16 +96,16 @@ export const mockDailySales: DailySale[] = [
 ];
 
 export const mockSalesImports: SalesImport[] = [
-  { id: '1', fileName: 'epos_sales_22072026.csv', uploadDate: '22/07/2026 09:15', records: 250, status: 'Success' },
-  { id: '2', fileName: 'epos_sales_21072026.xlsx', uploadDate: '21/07/2026 09:02', records: 230, status: 'Success' },
-  { id: '3', fileName: 'epos_sales_20072026.csv', uploadDate: '20/07/2026 09:30', records: 0, status: 'Failed' },
+  { id: '1', fileName: 'epos_sales_22072026.csv', uploadDate: '22/07/2026 09:15', records: 250, status: 'Success', method: 'csv' },
+  { id: '2', fileName: 'epos_sales_21072026.xlsx', uploadDate: '21/07/2026 09:02', records: 230, status: 'Success', method: 'csv' },
+  { id: '3', fileName: 'epos_sales_20072026.csv', uploadDate: '20/07/2026 09:30', records: 0, status: 'Failed', method: 'csv' },
 ];
 
 export const mockSuppliers: Supplier[] = [
-  { id: '1', name: 'Fresh Foods Ltd', contact: 'David Brown', email: 'david@freshfoods.co.uk', phone: '020 7123 4567', vatNumber: 'GB123456789', balance: 1250, status: 'Active', paymentTerms: 'Net 30' },
-  { id: '2', name: 'Dairy Direct', contact: 'Lisa Green', email: 'lisa@dairydirect.com', phone: '0161 987 6543', vatNumber: 'GB987654321', balance: 480, status: 'Active', paymentTerms: 'Net 14' },
-  { id: '3', name: 'Beverage Wholesale', contact: 'Tom Hughes', email: 'tom@bevwholesale.com', phone: '0113 555 1212', vatNumber: 'GB555121234', balance: 0, status: 'Active', paymentTerms: 'Net 30' },
-  { id: '4', name: 'Old Supplier Co', contact: 'Jane Doe', email: 'jane@oldsup.com', phone: '020 1111 2222', vatNumber: 'GB111222333', balance: 0, status: 'Inactive' },
+  { id: '1', supplierCode: 'SUP-001', name: 'Fresh Foods Ltd', contact: 'David Brown', email: 'david@freshfoods.co.uk', phone: '020 7123 4567', vatNumber: 'GB123456789', openingBalance: 1250, balance: 1250, status: 'Active', paymentTerms: 'Net 30' },
+  { id: '2', supplierCode: 'SUP-002', name: 'Dairy Direct', contact: 'Lisa Green', email: 'lisa@dairydirect.com', phone: '0161 987 6543', vatNumber: 'GB987654321', openingBalance: 480, balance: 480, status: 'Active', paymentTerms: 'Net 14' },
+  { id: '3', supplierCode: 'SUP-003', name: 'Beverage Wholesale', contact: 'Tom Hughes', email: 'tom@bevwholesale.com', phone: '0113 555 1212', vatNumber: 'GB555121234', openingBalance: 0, balance: 0, status: 'Active', paymentTerms: 'Net 30' },
+  { id: '4', supplierCode: 'SUP-004', name: 'Old Supplier Co', contact: 'Jane Doe', email: 'jane@oldsup.com', phone: '020 1111 2222', vatNumber: 'GB111222333', openingBalance: 0, balance: 0, status: 'Inactive' },
 ];
 
 export const mockPurchaseOrders: PurchaseOrder[] = [

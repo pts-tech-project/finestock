@@ -4,18 +4,20 @@ import { useAuth } from '../context/AuthContext';
 import { useModules } from '../context/ModuleContext';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { PoweredByFooter } from '../components/PoweredByFooter';
+import { AuthLoadingFallback } from '../components/AuthLoadingFallback';
 import { Button } from '../components/ui/Button';
 import { Field, Input } from '../components/ui/Input';
 
 export function LoginPage() {
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, bootstrapping } = useAuth();
   const { clearModule } = useModules();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('john@restaurant.com');
-  const [password, setPassword] = useState('demo');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  if (bootstrapping) return <AuthLoadingFallback />;
   if (isAuthenticated) return <Navigate to="/modules" replace />;
 
   const handleSubmit = async (e: FormEvent) => {
@@ -99,11 +101,6 @@ export function LoginPage() {
               Forgot password?
             </Link>
           </form>
-
-          <div className="login-hint">
-            <span>Full access — john@restaurant.com / demo</span>
-            <span>Finance only — sarah@restaurant.com / demo</span>
-          </div>
         </div>
       </div>
 
@@ -314,19 +311,6 @@ export function LoginPage() {
           text-decoration: underline;
         }
 
-        .login-hint {
-          margin-top: 1.35rem;
-          padding-top: 1rem;
-          border-top: 1px solid var(--color-border);
-          display: flex;
-          flex-direction: column;
-          gap: 0.3rem;
-          font-size: 0.72rem;
-          color: var(--color-text-muted);
-          text-align: center;
-          animation: login-rise 0.5s ease 0.55s both;
-        }
-
         @media (max-width: 820px) {
           .login-shell {
             grid-template-columns: 1fr;
@@ -347,7 +331,7 @@ export function LoginPage() {
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .login-orb, .login-hero, .login-card, .login-mark, .login-form > *, .login-hint, .login-error {
+          .login-orb, .login-hero, .login-card, .login-mark, .login-form > *, .login-error {
             animation: none !important;
           }
         }

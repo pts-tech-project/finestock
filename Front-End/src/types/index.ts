@@ -1,4 +1,4 @@
-export type UserRole = 'Owner' | 'Manager' | 'Accountant' | 'Staff';
+export type UserRole = string;
 
 export type ModuleId = 'core' | 'hmrc' | 'payroll' | 'ai';
 
@@ -17,8 +17,29 @@ export interface User {
   email: string;
   role: UserRole;
   status: 'Active' | 'Inactive';
+  companyId: string | null;
   /** Modules unlocked for this account’s subscription */
   modules: ModuleId[];
+}
+
+export interface CompanyProfile {
+  id?: string;
+  name: string;
+  tradingName: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  postcode: string;
+  country: string;
+  phone: string;
+  email: string;
+  website: string;
+  vatNumber: string;
+  companyNumber: string;
+  currency: string;
+  financialYear: string;
+  vatScheme: string;
+  notes: string;
 }
 
 export interface Product {
@@ -74,6 +95,34 @@ export interface DailySale {
   netSales: number;
   source: string;
   status: 'Imported' | 'Pending' | 'Error';
+  tips?: number;
+  fees?: number;
+  averageOrder?: number;
+  categories?: SquareCategorySale[];
+}
+
+export type SalesImportMethod = 'csv' | 'txt' | 'screenshot';
+
+export interface SquareCategorySale {
+  category: string;
+  itemsSold: number;
+  netSales: number;
+}
+
+export interface SquareParsedReport {
+  businessName?: string;
+  date: string;
+  period?: string;
+  netSales: number;
+  grossSales: number;
+  taxes: number;
+  tips: number;
+  fees: number;
+  totalSales: number;
+  totalOrders: number;
+  averageOrder: number;
+  categories: SquareCategorySale[];
+  orderSource?: string;
 }
 
 export interface SalesImport {
@@ -82,18 +131,22 @@ export interface SalesImport {
   uploadDate: string;
   records: number;
   status: 'Success' | 'Failed' | 'Processing';
+  method?: SalesImportMethod;
+  report?: SquareParsedReport;
 }
 
 export interface Supplier {
   id: string;
+  supplierCode: string;
   name: string;
-  contact: string;
-  email: string;
-  phone: string;
-  vatNumber: string;
+  contact: string | null;
+  email: string | null;
+  phone: string | null;
+  vatNumber: string | null;
+  openingBalance: number;
   balance: number;
   status: 'Active' | 'Inactive';
-  address?: string;
+  address?: string | null;
   paymentTerms?: string;
 }
 

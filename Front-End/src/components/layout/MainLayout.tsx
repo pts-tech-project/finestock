@@ -45,13 +45,13 @@ export function MainLayout() {
           <button type="button" className="icon-btn" aria-label="Notifications">
             <Bell size={18} />
           </button>
-          <div className="user-chip">
+          <Link to="/settings/profile" className="user-chip" title="My profile">
             <div className="user-avatar"><User size={16} /></div>
             <div className="user-meta">
               <span className="user-name">{user?.name}</span>
               <span className="user-role">{user?.role}</span>
             </div>
-          </div>
+          </Link>
           <button type="button" className="icon-btn" onClick={handleLogout} aria-label="Logout" title="Logout">
             <LogOut size={18} />
           </button>
@@ -134,7 +134,11 @@ export function MainLayout() {
         .user-chip {
           display: flex; align-items: center; gap: 0.6rem;
           padding: 0.25rem 0.5rem 0.25rem 0.25rem;
+          border-radius: 10px;
+          text-decoration: none;
+          transition: background var(--transition);
         }
+        .user-chip:hover { background: var(--color-bg-muted); }
         .user-avatar {
           width: 34px; height: 34px; border-radius: 9px;
           background: linear-gradient(145deg, var(--color-accent), var(--color-sidebar));

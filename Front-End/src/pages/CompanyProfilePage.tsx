@@ -1,34 +1,42 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Building2, MapPin, Phone, Mail, Globe } from 'lucide-react';
-import { Card } from '../components/ui/Card';
+import { Card, Loading } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Field, Input, Select, Textarea } from '../components/ui/Input';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
+import { ApiError } from '../lib/api';
+import { emptyCompanyForm, getCompany, upsertCompany } from '../lib/companyApi';
+import type { CompanyProfile } from '../types';
 
 export function CompanyProfilePage() {
   const { toast } = useToast();
+  const { user, refreshUser } = useAuth();
+  const canEdit = user?.role === 'Owner' || user?.role === 'Manager';
+
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [form, setForm] = useState({
-    name: 'The Harbour Kitchen',
-    tradingName: 'Harbour Kitchen',
-    addressLine1: '12 Quay Street',
-    addressLine2: '',
-    city: 'Brighton',
-    postcode: 'BN1 1AA',
-    country: 'United Kingdom',
-    phone: '01273 555 010',
-    email: 'hello@harbourkitchen.co.uk',
-    website: 'https://harbourkitchen.co.uk',
-    vatNumber: 'GB123456789',
-    companyNumber: '12345678',
-    currency: 'GBP',
-    financialYear: 'April – March',
-    vatScheme: 'Standard',
-    notes: '',
-  });
+  const [form, setForm] = useState<CompanyProfile>(emptyCompanyForm);
 
-  const update = (key: keyof typeof form, value: string) => {
+  const loadCompany = useCallback(async () => {
+    setLoading(true);
+    try {
+      const company = await getCompany();
+      setForm(company ?? emptyCompanyForm());
+      setErrors({});
+    } catch (err) {
+      toast(err instanceof ApiError ? err.message : 'Failed to load company profile', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
+
+  useEffect(() => {
+    void loadCompany();
+  }, [loadCompany]);
+
+  const update = (key: keyof CompanyProfile, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -37,6 +45,7 @@ export function CompanyProfilePage() {
     if (!form.name.trim()) next.name = 'Restaurant name is required';
     if (!form.vatNumber.trim()) next.vatNumber = 'VAT number is required';
     if (!form.email.trim()) next.email = 'Email is required';
+    else if (!form.email.includes('@')) next.email = 'Enter a valid email';
     if (!form.addressLine1.trim()) next.addressLine1 = 'Address is required';
     if (!form.city.trim()) next.city = 'City is required';
     if (!form.postcode.trim()) next.postcode = 'Postcode is required';
@@ -44,16 +53,39 @@ export function CompanyProfilePage() {
   };
 
   const handleSave = async () => {
+    if (!canEdit) {
+      toast('Only Owners and Managers can update the company profile', 'error');
+      return;
+    }
+
     const next = validate();
     setErrors(next);
     if (Object.keys(next).length) {
       toast('Please fix the highlighted fields', 'error');
       return;
     }
+
     setSaving(true);
-    await new Promise((r) => setTimeout(r, 500));
-    setSaving(false);
-    toast('Company profile saved');
+    try {
+      const result = await upsertCompany({
+        ...form,
+        name: form.name.trim(),
+        email: form.email.trim(),
+      });
+      setForm(result.company);
+      if (!user?.companyId && result.company.id) {
+        try {
+          await refreshUser();
+        } catch {
+          // Profile saved; session refresh is best-effort
+        }
+      }
+      toast(result.message);
+    } catch (err) {
+      toast(err instanceof ApiError ? err.message : 'Failed to save company profile', 'error');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -61,120 +93,252 @@ export function CompanyProfilePage() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Company Profile</h1>
-          <p className="page-subtitle">Restaurant details used across invoices, VAT and reports</p>
+          <p className="page-subtitle">
+            Restaurant details used across invoices, VAT and reports
+            {!canEdit && ' — view only'}
+          </p>
         </div>
-        <Button onClick={handleSave} loading={saving}>Save Changes</Button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <Button variant="outline" onClick={() => void loadCompany()} disabled={loading || saving}>
+            Refresh
+          </Button>
+          {canEdit && (
+            <Button onClick={() => void handleSave()} loading={saving} disabled={loading}>
+              Save Changes
+            </Button>
+          )}
+        </div>
       </div>
 
-      <div className="profile-layout">
-        <Card title="Business Identity">
-          <div className="form-grid">
-            <Field label="Restaurant Name" htmlFor="cp-name" error={errors.name}>
-              <Input id="cp-name" value={form.name} onChange={(e) => update('name', e.target.value)} error={!!errors.name} />
-            </Field>
-            <Field label="Trading Name" htmlFor="cp-trading">
-              <Input id="cp-trading" value={form.tradingName} onChange={(e) => update('tradingName', e.target.value)} />
-            </Field>
-            <Field label="VAT Number" htmlFor="cp-vat" error={errors.vatNumber}>
-              <Input id="cp-vat" value={form.vatNumber} onChange={(e) => update('vatNumber', e.target.value)} error={!!errors.vatNumber} />
-            </Field>
-            <Field label="Company Number" htmlFor="cp-co">
-              <Input id="cp-co" value={form.companyNumber} onChange={(e) => update('companyNumber', e.target.value)} />
-            </Field>
-          </div>
+      {loading ? (
+        <Card>
+          <Loading label="Loading company profile..." />
         </Card>
-
-        <Card title="Address">
-          <div className="form-grid">
-            <div style={{ gridColumn: '1 / -1' }}>
-              <Field label="Address Line 1" htmlFor="cp-a1" error={errors.addressLine1}>
-                <Input id="cp-a1" value={form.addressLine1} onChange={(e) => update('addressLine1', e.target.value)} error={!!errors.addressLine1} />
+      ) : (
+        <div className="profile-layout">
+          <Card title="Business Identity">
+            <div className="form-grid">
+              <Field label="Restaurant Name" htmlFor="cp-name" error={errors.name}>
+                <Input
+                  id="cp-name"
+                  value={form.name}
+                  onChange={(e) => update('name', e.target.value)}
+                  error={!!errors.name}
+                  disabled={!canEdit}
+                />
+              </Field>
+              <Field label="Trading Name" htmlFor="cp-trading">
+                <Input
+                  id="cp-trading"
+                  value={form.tradingName}
+                  onChange={(e) => update('tradingName', e.target.value)}
+                  disabled={!canEdit}
+                />
+              </Field>
+              <Field label="VAT Number" htmlFor="cp-vat" error={errors.vatNumber}>
+                <Input
+                  id="cp-vat"
+                  value={form.vatNumber}
+                  onChange={(e) => update('vatNumber', e.target.value)}
+                  error={!!errors.vatNumber}
+                  disabled={!canEdit}
+                />
+              </Field>
+              <Field label="Company Number" htmlFor="cp-co">
+                <Input
+                  id="cp-co"
+                  value={form.companyNumber}
+                  onChange={(e) => update('companyNumber', e.target.value)}
+                  disabled={!canEdit}
+                />
               </Field>
             </div>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <Field label="Address Line 2" htmlFor="cp-a2">
-                <Input id="cp-a2" value={form.addressLine2} onChange={(e) => update('addressLine2', e.target.value)} />
+          </Card>
+
+          <Card title="Address">
+            <div className="form-grid">
+              <div style={{ gridColumn: '1 / -1' }}>
+                <Field label="Address Line 1" htmlFor="cp-a1" error={errors.addressLine1}>
+                  <Input
+                    id="cp-a1"
+                    value={form.addressLine1}
+                    onChange={(e) => update('addressLine1', e.target.value)}
+                    error={!!errors.addressLine1}
+                    disabled={!canEdit}
+                  />
+                </Field>
+              </div>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <Field label="Address Line 2" htmlFor="cp-a2">
+                  <Input
+                    id="cp-a2"
+                    value={form.addressLine2}
+                    onChange={(e) => update('addressLine2', e.target.value)}
+                    disabled={!canEdit}
+                  />
+                </Field>
+              </div>
+              <Field label="City" htmlFor="cp-city" error={errors.city}>
+                <Input
+                  id="cp-city"
+                  value={form.city}
+                  onChange={(e) => update('city', e.target.value)}
+                  error={!!errors.city}
+                  disabled={!canEdit}
+                />
+              </Field>
+              <Field label="Postcode" htmlFor="cp-pc" error={errors.postcode}>
+                <Input
+                  id="cp-pc"
+                  value={form.postcode}
+                  onChange={(e) => update('postcode', e.target.value)}
+                  error={!!errors.postcode}
+                  disabled={!canEdit}
+                />
+              </Field>
+              <Field label="Country" htmlFor="cp-country">
+                <Input
+                  id="cp-country"
+                  value={form.country}
+                  onChange={(e) => update('country', e.target.value)}
+                  disabled={!canEdit}
+                />
               </Field>
             </div>
-            <Field label="City" htmlFor="cp-city" error={errors.city}>
-              <Input id="cp-city" value={form.city} onChange={(e) => update('city', e.target.value)} error={!!errors.city} />
-            </Field>
-            <Field label="Postcode" htmlFor="cp-pc" error={errors.postcode}>
-              <Input id="cp-pc" value={form.postcode} onChange={(e) => update('postcode', e.target.value)} error={!!errors.postcode} />
-            </Field>
-            <Field label="Country" htmlFor="cp-country">
-              <Input id="cp-country" value={form.country} onChange={(e) => update('country', e.target.value)} />
-            </Field>
-          </div>
-        </Card>
+          </Card>
 
-        <Card title="Contact">
-          <div className="form-grid">
-            <Field label="Phone" htmlFor="cp-phone">
-              <Input id="cp-phone" value={form.phone} onChange={(e) => update('phone', e.target.value)} />
-            </Field>
-            <Field label="Email" htmlFor="cp-email" error={errors.email}>
-              <Input id="cp-email" type="email" value={form.email} onChange={(e) => update('email', e.target.value)} error={!!errors.email} />
-            </Field>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <Field label="Website" htmlFor="cp-web">
-                <Input id="cp-web" value={form.website} onChange={(e) => update('website', e.target.value)} />
+          <Card title="Contact">
+            <div className="form-grid">
+              <Field label="Phone" htmlFor="cp-phone">
+                <Input
+                  id="cp-phone"
+                  value={form.phone}
+                  onChange={(e) => update('phone', e.target.value)}
+                  disabled={!canEdit}
+                />
               </Field>
-            </div>
-          </div>
-        </Card>
-
-        <Card title="Financial Settings">
-          <div className="form-grid">
-            <Field label="Currency" htmlFor="cp-cur">
-              <Select id="cp-cur" value={form.currency} onChange={(e) => update('currency', e.target.value)}>
-                <option value="GBP">GBP (£)</option>
-                <option value="EUR">EUR (€)</option>
-                <option value="USD">USD ($)</option>
-              </Select>
-            </Field>
-            <Field label="Financial Year" htmlFor="cp-fy">
-              <Select id="cp-fy" value={form.financialYear} onChange={(e) => update('financialYear', e.target.value)}>
-                <option>April – March</option>
-                <option>January – December</option>
-              </Select>
-            </Field>
-            <Field label="VAT Scheme" htmlFor="cp-scheme">
-              <Select id="cp-scheme" value={form.vatScheme} onChange={(e) => update('vatScheme', e.target.value)}>
-                <option>Standard</option>
-                <option>Flat Rate</option>
-                <option>Cash Accounting</option>
-              </Select>
-            </Field>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <Field label="Notes" htmlFor="cp-notes">
-                <Textarea id="cp-notes" value={form.notes} onChange={(e) => update('notes', e.target.value)} placeholder="Optional notes about the business..." />
+              <Field label="Email" htmlFor="cp-email" error={errors.email}>
+                <Input
+                  id="cp-email"
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => update('email', e.target.value)}
+                  error={!!errors.email}
+                  disabled={!canEdit}
+                />
               </Field>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <Field label="Website" htmlFor="cp-web">
+                  <Input
+                    id="cp-web"
+                    value={form.website}
+                    onChange={(e) => update('website', e.target.value)}
+                    disabled={!canEdit}
+                  />
+                </Field>
+              </div>
             </div>
-          </div>
-        </Card>
+          </Card>
 
-        <Card title="Profile Summary" className="summary-card">
-          <div className="summary">
-            <div className="summary-icon"><Building2 size={22} /></div>
-            <div>
-              <h3>{form.name || 'Restaurant name'}</h3>
-              {form.tradingName && <p className="text-muted">Trading as {form.tradingName}</p>}
+          <Card title="Financial Settings">
+            <div className="form-grid">
+              <Field label="Currency" htmlFor="cp-cur">
+                <Select
+                  id="cp-cur"
+                  value={form.currency}
+                  onChange={(e) => update('currency', e.target.value)}
+                  disabled={!canEdit}
+                >
+                  <option value="GBP">GBP (£)</option>
+                  <option value="EUR">EUR (€)</option>
+                  <option value="USD">USD ($)</option>
+                </Select>
+              </Field>
+              <Field label="Financial Year" htmlFor="cp-fy">
+                <Select
+                  id="cp-fy"
+                  value={form.financialYear}
+                  onChange={(e) => update('financialYear', e.target.value)}
+                  disabled={!canEdit}
+                >
+                  <option>April – March</option>
+                  <option>January – December</option>
+                </Select>
+              </Field>
+              <Field label="VAT Scheme" htmlFor="cp-scheme">
+                <Select
+                  id="cp-scheme"
+                  value={form.vatScheme}
+                  onChange={(e) => update('vatScheme', e.target.value)}
+                  disabled={!canEdit}
+                >
+                  <option>Standard</option>
+                  <option>Flat Rate</option>
+                  <option>Cash Accounting</option>
+                </Select>
+              </Field>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <Field label="Notes" htmlFor="cp-notes">
+                  <Textarea
+                    id="cp-notes"
+                    value={form.notes}
+                    onChange={(e) => update('notes', e.target.value)}
+                    placeholder="Optional notes about the business..."
+                    disabled={!canEdit}
+                  />
+                </Field>
+              </div>
             </div>
-          </div>
-          <ul className="summary-list">
-            <li><MapPin size={15} /><span>{[form.addressLine1, form.city, form.postcode].filter(Boolean).join(', ') || 'Address not set'}</span></li>
-            <li><Phone size={15} /><span>{form.phone || '—'}</span></li>
-            <li><Mail size={15} /><span>{form.email || '—'}</span></li>
-            <li><Globe size={15} /><span>{form.website || '—'}</span></li>
-          </ul>
-          <div className="summary-meta">
-            <div><span className="text-muted">VAT</span><strong>{form.vatNumber || '—'}</strong></div>
-            <div><span className="text-muted">Currency</span><strong>{form.currency}</strong></div>
-            <div><span className="text-muted">Year End</span><strong>{form.financialYear}</strong></div>
-          </div>
-        </Card>
-      </div>
+          </Card>
+
+          <Card title="Profile Summary" className="summary-card">
+            <div className="summary">
+              <div className="summary-icon">
+                <Building2 size={22} />
+              </div>
+              <div>
+                <h3>{form.name || 'Restaurant name'}</h3>
+                {form.tradingName && <p className="text-muted">Trading as {form.tradingName}</p>}
+              </div>
+            </div>
+            <ul className="summary-list">
+              <li>
+                <MapPin size={15} />
+                <span>
+                  {[form.addressLine1, form.city, form.postcode].filter(Boolean).join(', ') ||
+                    'Address not set'}
+                </span>
+              </li>
+              <li>
+                <Phone size={15} />
+                <span>{form.phone || '—'}</span>
+              </li>
+              <li>
+                <Mail size={15} />
+                <span>{form.email || '—'}</span>
+              </li>
+              <li>
+                <Globe size={15} />
+                <span>{form.website || '—'}</span>
+              </li>
+            </ul>
+            <div className="summary-meta">
+              <div>
+                <span className="text-muted">VAT</span>
+                <strong>{form.vatNumber || '—'}</strong>
+              </div>
+              <div>
+                <span className="text-muted">Currency</span>
+                <strong>{form.currency}</strong>
+              </div>
+              <div>
+                <span className="text-muted">Year End</span>
+                <strong>{form.financialYear}</strong>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
 
       <style>{`
         .profile-layout {

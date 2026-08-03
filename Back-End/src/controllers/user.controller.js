@@ -100,10 +100,13 @@ async function updateUser(req, res, next) {
 
     if (name !== undefined) user.name = name.trim();
     if (role !== undefined) {
-      if (!User.ROLES.includes(role)) {
+      const roleService = require('../services/role.service');
+      const exists = await roleService.roleExists(role);
+      if (!exists) {
+        const names = await roleService.listRoleNames();
         return res.status(400).json({
           success: false,
-          message: `Role must be one of: ${User.ROLES.join(', ')}`,
+          message: `Role must be one of: ${names.join(', ')}`,
         });
       }
       user.role = role;
