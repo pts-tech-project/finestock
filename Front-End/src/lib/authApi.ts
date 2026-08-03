@@ -71,4 +71,29 @@ export async function meRequest() {
   return apiFetch<MeResponse>('/api/auth/me');
 }
 
+export async function updateProfileRequest(payload: { name?: string; email?: string }) {
+  return apiFetch<{
+    success: boolean;
+    message: string;
+    data: {
+      user: AuthUserPayload;
+      permissions: Record<string, boolean>;
+      allowed: string[];
+    };
+  }>('/api/auth/me', {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function changePasswordRequest(payload: {
+  currentPassword: string;
+  newPassword: string;
+}) {
+  return apiFetch<{ success: boolean; message: string }>('/api/auth/change-password', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
 export { ApiError, clearToken, getToken, setToken };

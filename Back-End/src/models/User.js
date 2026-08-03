@@ -30,7 +30,8 @@ const User = sequelize.define(
       field: 'password_hash',
     },
     role: {
-      type: DataTypes.ENUM(...ROLES),
+      // STRING so custom roles can be assigned (was ENUM)
+      type: DataTypes.STRING(80),
       allowNull: false,
       defaultValue: 'Staff',
     },
@@ -57,7 +58,8 @@ const User = sequelize.define(
   }
 );
 
-User.ROLES = ROLES;
+User.ROLES = ROLES; // system roles (legacy); custom roles live in `roles` table
+User.SYSTEM_ROLES = ROLES;
 User.STATUSES = STATUSES;
 
 User.prototype.toSafeJSON = function toSafeJSON() {

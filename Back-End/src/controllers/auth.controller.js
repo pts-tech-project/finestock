@@ -45,6 +45,41 @@ async function me(req, res, next) {
   }
 }
 
+async function updateMe(req, res, next) {
+  try {
+    const { name, email } = req.body;
+    const user = await authService.updateProfile(req.user, { name, email });
+    const permissions = await roleService.getRolePermissions(user.role);
+    const allowed = await roleService.getPermissionsForRole(user.role);
+
+    return res.json({
+      success: true,
+      message: 'Profile updated',
+      data: {
+        user,
+        permissions,
+        allowed,
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function changePassword(req, res, next) {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    await authService.changePassword(req.user, { currentPassword, newPassword });
+
+    return res.json({
+      success: true,
+      message: 'Password changed successfully',
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 async function register(req, res, next) {
   try {
     const { name, email, role, status, companyId, password } = req.body;
@@ -79,5 +114,7 @@ async function register(req, res, next) {
 module.exports = {
   login,
   me,
+  updateMe,
+  changePassword,
   register,
 };

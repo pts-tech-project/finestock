@@ -1,9 +1,9 @@
 const User = require('./User');
 const Company = require('./Company');
+const Role = require('./Role');
 const RolePermission = require('./RolePermission');
 const Supplier = require('./Supplier');
 const CompanySupplier = require('./CompanySupplier');
-
 
 Company.hasMany(User, {
   foreignKey: 'companyId',
@@ -42,6 +42,7 @@ CompanySupplier.belongsTo(Supplier, {
 module.exports = {
   User,
   Company,
+  Role,
   RolePermission,
   Supplier,
   CompanySupplier,

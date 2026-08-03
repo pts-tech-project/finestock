@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const ROLES = ['Owner', 'Manager', 'Accountant', 'Staff'];
+const SYSTEM_ROLES = ['Owner', 'Manager', 'Accountant', 'Staff'];
 
 const PERMISSIONS = [
   'View Sales',
@@ -51,7 +51,8 @@ const RolePermission = sequelize.define(
       primaryKey: true,
     },
     role: {
-      type: DataTypes.ENUM(...ROLES),
+      // STRING so custom roles can be created (was ENUM)
+      type: DataTypes.STRING(80),
       allowNull: false,
     },
     permission: {
@@ -77,7 +78,8 @@ const RolePermission = sequelize.define(
   }
 );
 
-RolePermission.ROLES = ROLES;
+RolePermission.SYSTEM_ROLES = SYSTEM_ROLES;
+RolePermission.ROLES = SYSTEM_ROLES; // legacy alias
 RolePermission.PERMISSIONS = PERMISSIONS;
 RolePermission.DEFAULT_PERMISSIONS = DEFAULT_PERMISSIONS;
 

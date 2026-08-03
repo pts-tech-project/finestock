@@ -27,6 +27,12 @@ interface AuthContextValue {
   bootstrapping: boolean;
   login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
+  applySessionUser: (
+    userPayload: import('../lib/authApi').AuthUserPayload,
+    permissions?: Record<string, boolean>,
+    allowed?: string[],
+  ) => void;
   hasPermission: (name: string) => boolean;
 }
 
@@ -128,6 +134,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [permissions, allowed],
   );
 
+  const refreshUser = useCallback(async () => {
+    const existing = getToken();
+    if (!existing) return;
+    const res = await meRequest();
+    const mapped = mapAuthUser(res.data.user);
+    setUser(mapped);
+    setPermissions(res.data.permissions ?? {});
+    setAllowed(res.data.allowed ?? []);
+    localStorage.setItem(USER_KEY, JSON.stringify(mapped));
+  }, []);
+
+  const applySessionUser = useCallback(
+    (
+      userPayload: import('../lib/authApi').AuthUserPayload,
+      nextPermissions?: Record<string, boolean>,
+      nextAllowed?: string[],
+    ) => {
+      const mapped = mapAuthUser(userPayload);
+      setUser(mapped);
+      if (nextPermissions) setPermissions(nextPermissions);
+      if (nextAllowed) setAllowed(nextAllowed);
+      localStorage.setItem(USER_KEY, JSON.stringify(mapped));
+    },
+    [],
+  );
+
   return (
     <AuthContext.Provider
       value={{
@@ -139,6 +171,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         bootstrapping,
         login,
         logout,
+        refreshUser,
+        applySessionUser,
         hasPermission,
       }}
     >

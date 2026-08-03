@@ -12,6 +12,9 @@ const sequelize = new Sequelize(
     logging: process.env.NODE_ENV === 'development' ? console.log : false,
     dialectOptions: {
       charset: 'utf8mb4',
+      // Keep remote MySQL sessions alive (hosted DBs often drop idle connections)
+      enableKeepAlive: true,
+      keepAliveInitialDelay: 10000,
     },
     define: {
       charset: 'utf8mb4',
@@ -22,6 +25,10 @@ const sequelize = new Sequelize(
       min: 0,
       acquire: 30000,
       idle: 10000,
+      evict: 10000,
+    },
+    retry: {
+      max: 3,
     },
   }
 );

@@ -68,6 +68,7 @@ export const coreNavItems: NavItem[] = [
     label: 'Settings',
     icon: 'settings',
     children: [
+      { label: 'My Profile', path: '/settings/profile' },
       { label: 'Company Profile', path: '/settings/company' },
       { label: 'Users', path: '/settings/users' },
       { label: 'Roles & Permissions', path: '/settings/roles' },

@@ -1,4 +1,4 @@
-export type UserRole = 'Owner' | 'Manager' | 'Accountant' | 'Staff';
+export type UserRole = string;
 
 export type ModuleId = 'core' | 'hmrc' | 'payroll' | 'ai';
 
@@ -20,6 +20,26 @@ export interface User {
   companyId: string | null;
   /** Modules unlocked for this account’s subscription */
   modules: ModuleId[];
+}
+
+export interface CompanyProfile {
+  id?: string;
+  name: string;
+  tradingName: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  postcode: string;
+  country: string;
+  phone: string;
+  email: string;
+  website: string;
+  vatNumber: string;
+  companyNumber: string;
+  currency: string;
+  financialYear: string;
+  vatScheme: string;
+  notes: string;
 }
 
 export interface Product {
