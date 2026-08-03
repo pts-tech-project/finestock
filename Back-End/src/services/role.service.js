@@ -55,15 +55,12 @@ async function seedDefaultsIfEmpty() {
   if (defaultsSeeded) return { seeded: false, count: 0 };
 
   await ensureSystemRoles();
-  const count = await RolePermission.count();
-  if (count > 0) {
-    defaultsSeeded = true;
-    return { seeded: false, count };
-  }
-
+  const existing = await RolePermission.findAll({ attributes: ['role', 'permission'] });
+  const existingKeys = new Set(existing.map((row) => `${row.role}:${row.permission}`));
   const rows = [];
   for (const role of Role.SYSTEM_ROLES) {
     for (const permission of RolePermission.PERMISSIONS) {
+      if (existingKeys.has(`${role}:${permission}`)) continue;
       rows.push({
         role,
         permission,
@@ -72,9 +69,9 @@ async function seedDefaultsIfEmpty() {
     }
   }
 
-  await RolePermission.bulkCreate(rows);
+  if (rows.length) await RolePermission.bulkCreate(rows, { ignoreDuplicates: true });
   defaultsSeeded = true;
-  return { seeded: true, count: rows.length };
+  return { seeded: rows.length > 0, count: rows.length };
 }
 
 function buildMatrix(roleNames, rows) {

@@ -1,4 +1,4 @@
-const { User } = require('../models');
+const { User, RolePermission } = require('../models');
 const { verifyToken } = require('../utils/jwt');
 
 async function authenticate(req, res, next) {
@@ -36,7 +36,38 @@ function authorize(...roles) {
   };
 }
 
+function authorizeCompany(req, res, next) {
+  if (!req.user) {
+    return res.status(401).json({ success: false, message: 'Authentication required' });
+  }
+  if (!req.user.companyId || String(req.user.companyId) !== String(req.params.companyId)) {
+    return res.status(403).json({ success: false, message: 'You cannot access another restaurant' });
+  }
+  return next();
+}
+
+function authorizePermission(...permissions) {
+  return async (req, res, next) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ success: false, message: 'Authentication required' });
+      }
+      const allowedCount = await RolePermission.count({
+        where: { role: req.user.role, permission: permissions, allowed: true },
+      });
+      if (allowedCount !== permissions.length) {
+        return res.status(403).json({ success: false, message: `Missing permission: ${permissions.join(', ')}` });
+      }
+      return next();
+    } catch (error) {
+      return next(error);
+    }
+  };
+}
+
 module.exports = {
   authenticate,
   authorize,
+  authorizeCompany,
+  authorizePermission,
 };

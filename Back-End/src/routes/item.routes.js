@@ -1,15 +1,10 @@
 const express = require('express');
 const controller = require('../controllers/item.controller');
+const { authenticate, authorizeCompany, authorizePermission } = require('../middleware/auth');
 
 const router = express.Router({ mergeParams: true });
 
-// Authentication and permission middleware will be added when the auth phase starts.
-router.use((req, res, next) => {
-  if (process.env.NODE_ENV === 'production') {
-    return res.status(503).json({ success: false, message: 'Item API is unavailable until authentication is enabled' });
-  }
-  return next();
-});
+router.use(authenticate, authorizeCompany, authorizePermission('Manage Inventory'));
 
 router.get('/', controller.list);
 router.post('/', controller.create);

@@ -7,12 +7,16 @@ import { Field, Input, Select, Textarea } from '../components/ui/Input';
 import { ConfirmDialog, Modal } from '../components/ui/Modal';
 import { approveGoodsReceipt, createGoodsReceipt, listEligiblePurchaseOrders, listGoodsReceipts, updateGoodsReceipt, type GoodsReceiptInput } from '../api/goodsReceipts';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 import type { GoodsReceipt, PurchaseOrder } from '../types';
 
 const today = () => new Date().toISOString().slice(0, 10);
 
 export function GoodsReceiptPage() {
   const { toast } = useToast();
+  const { hasPermission } = useAuth();
+  const canReceiveGoods = hasPermission('Receive Goods');
+  const canApproveReceipt = hasPermission('Approve Goods Receipt');
   const [receipts, setReceipts] = useState<GoodsReceipt[]>([]);
   const [eligibleOrders, setEligibleOrders] = useState<PurchaseOrder[]>([]);
   const [status, setStatus] = useState('All');
@@ -76,11 +80,11 @@ export function GoodsReceiptPage() {
     { key: 'receiptDate', header: 'Receipt Date' },
     { key: 'totalAmount', header: 'Value', align: 'right', render: (row) => formatCurrency(row.totalAmount) },
     { key: 'status', header: 'Status', render: (row) => <Badge variant={row.status === 'APPROVED' ? 'success' : 'neutral'}>{row.status === 'APPROVED' ? 'Approved' : 'Draft'}</Badge> },
-    { key: 'actions', header: 'Approval / Actions', render: (row) => <div style={{ display: 'flex', gap: 4 }}><Button size="sm" variant="ghost" title="View" onClick={() => setViewing(row)}><Eye size={14} /></Button>{row.status === 'DRAFT' && <><Button size="sm" variant="ghost" title="Edit" onClick={() => openEdit(row)}><Pencil size={14} /></Button><Button size="sm" variant="ghost" title="Approve" onClick={() => setApproving(row)}><Check size={14} /></Button></>}</div> },
+    { key: 'actions', header: 'Approval / Actions', render: (row) => <div style={{ display: 'flex', gap: 4 }}><Button size="sm" variant="ghost" title="View" onClick={() => setViewing(row)}><Eye size={14} /></Button>{row.status === 'DRAFT' && canReceiveGoods && <Button size="sm" variant="ghost" title="Edit" onClick={() => openEdit(row)}><Pencil size={14} /></Button>}{row.status === 'DRAFT' && canApproveReceipt && <Button size="sm" variant="ghost" title="Approve" onClick={() => setApproving(row)}><Check size={14} /></Button>}</div> },
   ];
 
   return <div className="page">
-    <div className="page-header"><div><h1 className="page-title">Goods Receipts</h1><p className="page-subtitle">Receive approved purchase orders and update ingredient stock</p></div><Button onClick={openCreate}><Plus size={16} /> Create Receipt</Button></div>
+    <div className="page-header"><div><h1 className="page-title">Goods Receipts</h1><p className="page-subtitle">Receive approved purchase orders and update ingredient stock</p></div>{canReceiveGoods && <Button onClick={openCreate}><Plus size={16} /> Create Receipt</Button>}</div>
     <Card><div className="toolbar" style={{ marginBottom: '1rem' }}><Select value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }} style={{ width: 170 }}><option value="All">All Statuses</option><option value="DRAFT">Draft</option><option value="APPROVED">Approved</option></Select></div>{loading ? <p style={{ padding: '2rem', textAlign: 'center' }}>Loading receipts…</p> : error && !formOpen ? <p style={{ padding: '2rem', color: 'var(--color-danger)', textAlign: 'center' }}>{error}</p> : <DataTable columns={columns} data={receipts} keyField="id" emptyTitle="No goods receipts" emptyDescription="Approve a purchase order, then create its goods receipt." />}<Pagination page={page} totalPages={totalPages} onChange={setPage} /></Card>
 
     <Modal open={formOpen} onClose={() => !saving && setFormOpen(false)} title={editing ? `Edit ${editing.grnNumber}` : 'Create Goods Receipt'} size="lg" footer={<><Button variant="outline" onClick={() => setFormOpen(false)} disabled={saving}>Cancel</Button><Button onClick={() => void save()} loading={saving}>Save Draft</Button></>}>

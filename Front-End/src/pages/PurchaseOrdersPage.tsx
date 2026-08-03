@@ -8,6 +8,7 @@ import { ConfirmDialog, Modal } from '../components/ui/Modal';
 import { listItems } from '../api/items';
 import { approvePurchaseOrder, createPurchaseOrder, listPurchaseOrders, updatePurchaseOrder, type PurchaseOrderInput } from '../api/purchaseOrders';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 import type { Product, PurchaseOrder, PurchaseOrderLine } from '../types';
 
 type DraftLine = { key: string; itemId: string; orderedQuantity: string; unitPrice: string; vatRate: string };
@@ -20,6 +21,9 @@ function statusLabel(status: PurchaseOrder['status']) {
 
 export function PurchaseOrdersPage() {
   const { toast } = useToast();
+  const { hasPermission } = useAuth();
+  const canCreatePurchase = hasPermission('Create Purchase');
+  const canApprovePurchase = hasPermission('Approve Purchase');
   const [orders, setOrders] = useState<PurchaseOrder[]>([]);
   const [items, setItems] = useState<Product[]>([]);
   const [search, setSearch] = useState('');
@@ -113,14 +117,15 @@ export function PurchaseOrdersPage() {
     { key: 'status', header: 'Status', render: (row) => <Badge variant={badgeVariant(row.status)}>{statusLabel(row.status)}</Badge> },
     { key: 'actions', header: 'Approval / Actions', render: (row) => <div style={{ display: 'flex', gap: 4 }}>
       <Button size="sm" variant="ghost" title="View" onClick={() => setViewing(row)}><Eye size={14} /></Button>
-      {row.status === 'DRAFT' && <><Button size="sm" variant="ghost" title="Edit" onClick={() => openEdit(row)}><Pencil size={14} /></Button><Button size="sm" variant="ghost" title="Approve" onClick={() => setApproving(row)}><Check size={14} /></Button></>}
+      {row.status === 'DRAFT' && canCreatePurchase && <Button size="sm" variant="ghost" title="Edit" onClick={() => openEdit(row)}><Pencil size={14} /></Button>}
+      {row.status === 'DRAFT' && canApprovePurchase && <Button size="sm" variant="ghost" title="Approve" onClick={() => setApproving(row)}><Check size={14} /></Button>}
     </div> },
   ];
 
   const lineTable = (orderLines: PurchaseOrderLine[]) => <div className="table-wrap"><table className="data-table"><thead><tr><th>Item</th><th>Ordered</th><th>Received</th><th>Balance Qty</th><th>Unit Price</th><th>Line Total</th><th>Balance Amount</th></tr></thead><tbody>{orderLines.map((line) => <tr key={line.id}><td>{line.itemCode} — {line.itemName}</td><td>{line.orderedQuantity} {line.unit}</td><td>{line.receivedQuantity}</td><td>{line.balanceQuantity}</td><td>{formatCurrency(line.unitPrice)}</td><td>{formatCurrency(line.lineTotal)}</td><td>{formatCurrency(line.balanceAmount)}</td></tr>)}</tbody></table></div>;
 
   return <div className="page">
-    <div className="page-header"><div><h1 className="page-title">Purchase Orders</h1><p className="page-subtitle">Create and approve supplier orders; receive them through Goods Receipt</p></div><Button onClick={openCreate}><Plus size={16} /> Create PO</Button></div>
+    <div className="page-header"><div><h1 className="page-title">Purchase Orders</h1><p className="page-subtitle">Create and approve supplier orders; receive them through Goods Receipt</p></div>{canCreatePurchase && <Button onClick={openCreate}><Plus size={16} /> Create PO</Button>}</div>
     <Card><div className="toolbar" style={{ marginBottom: '1rem' }}><SearchInput value={search} onChange={(value) => { setSearch(value); setPage(1); }} placeholder="Search PO or supplier..." /><Select value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }} style={{ width: 190 }}><option value="All">All Statuses</option><option value="DRAFT">Draft</option><option value="APPROVED">Approved</option><option value="PARTIALLY_RECEIVED">Partially Received</option><option value="RECEIVED">Received</option></Select></div>
       {loading ? <p style={{ padding: '2rem', textAlign: 'center' }}>Loading purchase orders…</p> : error ? <p style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-danger)' }}>{error}</p> : <DataTable columns={columns} data={orders} keyField="id" emptyTitle="No purchase orders" emptyDescription="Create your first purchase order." />}
       {!loading && !error && <Pagination page={page} totalPages={totalPages} onChange={setPage} />}

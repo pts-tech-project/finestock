@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 const sequelize = require('../config/database');
-const { User } = require('../models');
+const { User, Company } = require('../models');
 const { generatePassword, hashPassword } = require('../utils/password');
 const { sendWelcomeCredentials } = require('../services/email.service');
 
@@ -19,6 +19,11 @@ const { sendWelcomeCredentials } = require('../services/email.service');
       process.exit(0);
     }
 
+    const company = await Company.findOne({ order: [['createdAt', 'ASC']] });
+    if (!company) {
+      throw new Error('Create a restaurant before creating the Owner account');
+    }
+
     const plainPassword = generatePassword(12);
     const user = await User.create({
       name,
@@ -26,18 +31,22 @@ const { sendWelcomeCredentials } = require('../services/email.service');
       passwordHash: await hashPassword(plainPassword),
       role: 'Owner',
       status: 'Active',
+      companyId: company.id,
     });
 
-    await sendWelcomeCredentials({
-      name: user.name,
-      email: user.email,
-      password: plainPassword,
-      role: user.role,
-    });
+    if (process.argv[4] !== '--no-email') {
+      await sendWelcomeCredentials({
+        name: user.name,
+        email: user.email,
+        password: plainPassword,
+        role: user.role,
+      });
+    }
 
     console.log('Owner created');
     console.log(`Email: ${user.email}`);
     console.log(`Password: ${plainPassword}`);
+    console.log(`Restaurant: ${company.name}`);
     process.exit(0);
   } catch (error) {
     console.error('Failed to create owner:', error.message);

@@ -1,7 +1,6 @@
 import type { PurchaseOrder } from '../types';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-const COMPANY_ID = import.meta.env.VITE_COMPANY_ID || '';
+import { apiFetch } from '../lib/api';
+import { companyApiPath } from '../lib/companyScopedApi';
 
 export interface PurchaseOrderInput {
   supplierId?: string | null;
@@ -20,14 +19,7 @@ interface ApiResponse<T> {
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<ApiResponse<T>> {
-  if (!COMPANY_ID) throw new Error('VITE_COMPANY_ID is missing from Front-End/.env');
-  const response = await fetch(`${API_URL}/companies/${COMPANY_ID}/purchase-orders${path}`, {
-    ...options,
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-  });
-  const body = await response.json().catch(() => ({ success: false, message: 'Invalid server response' }));
-  if (!response.ok) throw new Error(body.message || 'Purchase order request failed');
-  return body;
+  return apiFetch<ApiResponse<T>>(`${companyApiPath('purchase-orders')}${path}`, options);
 }
 
 export function listPurchaseOrders(params: { search?: string; status?: string; page?: number; pageSize?: number }) {

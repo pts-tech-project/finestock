@@ -1,10 +1,7 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-const COMPANY_ID = import.meta.env.VITE_COMPANY_ID || '';
+import { apiFetch } from '../lib/api';
+import { companyApiPath } from '../lib/companyScopedApi';
 async function get<T>(path: string): Promise<T> {
-  if (!COMPANY_ID) throw new Error('VITE_COMPANY_ID is missing from Front-End/.env');
-  const response = await fetch(`${API_URL}/companies/${COMPANY_ID}/stock${path}`);
-  const body = await response.json().catch(() => ({ message: 'Invalid server response' }));
-  if (!response.ok) throw new Error(body.message || 'Stock request failed');
+  const body = await apiFetch<{ data: T }>(`${companyApiPath('stock')}${path}`);
   return body.data;
 }
 export interface StockBalanceDto { id: string; itemCode: string; name: string; category: string | null; unit: string; reorderLevel: number; quantity: number; averageCost: number; }
