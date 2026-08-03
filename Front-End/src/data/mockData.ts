@@ -52,12 +52,12 @@ export const mockUsers: User[] = [
 ];
 
 export const mockProducts: Product[] = [
-  { id: '1', name: 'Chicken Burger', category: 'Food', sellingPrice: 12.99, vatRate: 20, cost: 3.0, status: 'Active', description: 'Grilled chicken breast burger with cheese' },
-  { id: '2', name: 'Margherita Pizza', category: 'Food', sellingPrice: 11.5, vatRate: 20, cost: 2.8, status: 'Active' },
-  { id: '3', name: 'Caesar Salad', category: 'Food', sellingPrice: 9.99, vatRate: 20, cost: 2.2, status: 'Active' },
-  { id: '4', name: 'Cola 330ml', category: 'Drinks', sellingPrice: 2.5, vatRate: 20, cost: 0.6, status: 'Active' },
-  { id: '5', name: 'House Wine Glass', category: 'Drinks', sellingPrice: 5.5, vatRate: 20, cost: 1.4, status: 'Active' },
-  { id: '6', name: 'Tiramisu', category: 'Dessert', sellingPrice: 6.99, vatRate: 20, cost: 1.8, status: 'Inactive' },
+  { id: '1', itemCode: 'MENU-001', name: 'Chicken Burger', itemType: 'MENU_ITEM', category: 'Food', unit: 'PCS', sellingPrice: 12.99, vatRate: 20, costPerUnit: 3.0, reorderLevel: null, status: 'Active', description: 'Grilled chicken breast burger with cheese' },
+  { id: '2', itemCode: 'MENU-002', name: 'Margherita Pizza', itemType: 'MENU_ITEM', category: 'Food', unit: 'PCS', sellingPrice: 11.5, vatRate: 20, costPerUnit: 2.8, reorderLevel: null, status: 'Active' },
+  { id: '3', itemCode: 'MENU-003', name: 'Caesar Salad', itemType: 'MENU_ITEM', category: 'Food', unit: 'PCS', sellingPrice: 9.99, vatRate: 20, costPerUnit: 2.2, reorderLevel: null, status: 'Active' },
+  { id: '4', itemCode: 'MENU-004', name: 'Cola 330ml', itemType: 'MENU_ITEM', category: 'Drinks', unit: 'PCS', sellingPrice: 2.5, vatRate: 20, costPerUnit: 0.6, reorderLevel: null, status: 'Active' },
+  { id: '5', itemCode: 'MENU-005', name: 'House Wine Glass', itemType: 'MENU_ITEM', category: 'Drinks', unit: 'GLASS', sellingPrice: 5.5, vatRate: 20, costPerUnit: 1.4, reorderLevel: null, status: 'Active' },
+  { id: '6', itemCode: 'MENU-006', name: 'Tiramisu', itemType: 'MENU_ITEM', category: 'Dessert', unit: 'PCS', sellingPrice: 6.99, vatRate: 20, costPerUnit: 1.8, reorderLevel: null, status: 'Inactive' },
 ];
 
 export const mockRecipe: RecipeIngredient[] = [
@@ -105,18 +105,10 @@ export const mockSuppliers: Supplier[] = [
 ];
 
 export const mockPurchaseOrders: PurchaseOrder[] = [
-  { id: '1', poNumber: 'PO1001', supplier: 'Fresh Foods Ltd', date: '20/07/2026', amount: 850, status: 'Received' },
-  { id: '2', poNumber: 'PO1002', supplier: 'Dairy Direct', date: '21/07/2026', amount: 420, status: 'Sent' },
-  { id: '3', poNumber: 'PO1003', supplier: 'Beverage Wholesale', date: '22/07/2026', amount: 310, status: 'Draft' },
-  { id: '4', poNumber: 'PO1000', supplier: 'Fresh Foods Ltd', date: '15/07/2026', amount: 1200, status: 'Completed' },
-  { id: '5', poNumber: 'PO0999', supplier: 'Dairy Direct', date: '10/07/2026', amount: 200, status: 'Cancelled' },
+  { id: '1', poNumber: 'PO-2026-00001', supplierId: null, supplierName: 'Fresh Foods Ltd', orderDate: '2026-07-20', expectedDeliveryDate: null, notes: null, subtotal: 708.33, vatAmount: 141.67, totalAmount: 850, receivedAmount: 850, balanceAmount: 0, approvedAt: '2026-07-20', status: 'RECEIVED', lines: [] },
 ];
 
-export const mockGoodsReceipts: GoodsReceipt[] = [
-  { id: '1', poNumber: 'PO1001', supplier: 'Fresh Foods Ltd', expectedItems: 12, receivedItems: 12, status: 'Complete' },
-  { id: '2', poNumber: 'PO1002', supplier: 'Dairy Direct', expectedItems: 8, receivedItems: 5, status: 'Partial' },
-  { id: '3', poNumber: 'PO1003', supplier: 'Beverage Wholesale', expectedItems: 6, receivedItems: 0, status: 'Pending' },
-];
+export const mockGoodsReceipts: GoodsReceipt[] = [];
 
 export const mockSupplierInvoices: SupplierInvoice[] = [
   { id: '1', invoiceNumber: 'INV-8841', supplier: 'Fresh Foods Ltd', date: '22/07/2026', amount: 850, vat: 170, status: 'Paid' },

@@ -4,6 +4,10 @@ const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const companyRoutes = require('./routes/company.routes');
 const roleRoutes = require('./routes/role.routes');
+const itemRoutes = require('./routes/item.routes');
+const purchaseOrderRoutes = require('./routes/purchaseOrder.routes');
+const goodsReceiptRoutes = require('./routes/goodsReceipt.routes');
+const stockRoutes = require('./routes/stock.routes');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -25,6 +29,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/company', companyRoutes);
 app.use('/api/roles', roleRoutes);
+app.use('/api/companies/:companyId/items', itemRoutes);
+app.use('/api/companies/:companyId/purchase-orders', purchaseOrderRoutes);
+app.use('/api/companies/:companyId/goods-receipts', goodsReceiptRoutes);
+app.use('/api/companies/:companyId/stock', stockRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

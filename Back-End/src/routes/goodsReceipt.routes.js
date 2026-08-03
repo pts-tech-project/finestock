@@ -1,0 +1,11 @@
+const express = require('express');
+const controller = require('../controllers/goodsReceipt.controller');
+const router = express.Router({ mergeParams: true });
+router.use((req, res, next) => process.env.NODE_ENV === 'production' ? res.status(503).json({ success: false, message: 'Goods Receipt API is unavailable until authentication is enabled' }) : next());
+router.get('/eligible-purchase-orders', controller.eligible);
+router.get('/', controller.list);
+router.post('/', controller.create);
+router.get('/:receiptId', controller.get);
+router.patch('/:receiptId', controller.update);
+router.post('/:receiptId/approve', controller.approve);
+module.exports = router;

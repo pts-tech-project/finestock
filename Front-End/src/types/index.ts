@@ -23,13 +23,19 @@ export interface User {
 
 export interface Product {
   id: string;
+  itemCode: string;
   name: string;
+  itemType: 'INGREDIENT' | 'MENU_ITEM';
   category: string;
-  sellingPrice: number;
-  vatRate: number;
-  cost: number;
+  unit: string;
+  sellingPrice: number | null;
+  vatRate: number | null;
+  costPerUnit: number | null;
+  reorderLevel: number | null;
   status: 'Active' | 'Inactive';
-  description?: string;
+  description?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface RecipeIngredient {
@@ -94,19 +100,64 @@ export interface Supplier {
 export interface PurchaseOrder {
   id: string;
   poNumber: string;
-  supplier: string;
-  date: string;
-  amount: number;
-  status: 'Draft' | 'Sent' | 'Received' | 'Completed' | 'Cancelled';
+  supplierId: string | null;
+  supplierName: string;
+  orderDate: string;
+  expectedDeliveryDate: string | null;
+  notes: string | null;
+  status: 'DRAFT' | 'APPROVED' | 'PARTIALLY_RECEIVED' | 'RECEIVED' | 'CANCELLED';
+  subtotal: number;
+  vatAmount: number;
+  totalAmount: number;
+  receivedAmount: number;
+  balanceAmount: number;
+  approvedAt: string | null;
+  lines: PurchaseOrderLine[];
+}
+
+export interface PurchaseOrderLine {
+  id: string;
+  itemId: string;
+  itemCode: string;
+  itemName: string;
+  unit: string;
+  orderedQuantity: number;
+  receivedQuantity: number;
+  balanceQuantity: number;
+  unitPrice: number;
+  vatRate: number;
+  lineSubtotal: number;
+  vatAmount: number;
+  lineTotal: number;
+  receivedAmount: number;
+  balanceAmount: number;
+  item?: Product;
 }
 
 export interface GoodsReceipt {
   id: string;
-  poNumber: string;
-  supplier: string;
-  expectedItems: number;
-  receivedItems: number;
-  status: 'Pending' | 'Partial' | 'Complete';
+  purchaseOrderId: string;
+  grnNumber: string;
+  receiptDate: string;
+  deliveryNoteNumber: string | null;
+  notes: string | null;
+  status: 'DRAFT' | 'APPROVED';
+  totalAmount: number;
+  approvedAt: string | null;
+  purchaseOrder: { id: string; poNumber: string; supplierName: string; status: PurchaseOrder['status'] };
+  lines: GoodsReceiptLine[];
+}
+
+export interface GoodsReceiptLine {
+  id: string;
+  purchaseOrderLineId: string;
+  itemId: string;
+  itemCode: string;
+  itemName: string;
+  unit: string;
+  quantityReceived: number;
+  unitCost: number;
+  lineAmount: number;
 }
 
 export interface SupplierInvoice {
