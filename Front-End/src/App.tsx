@@ -8,6 +8,7 @@ import { ModuleRoute } from './components/ModuleRoute';
 import { MainLayout } from './components/layout/MainLayout';
 import { LoginPage } from './pages/LoginPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { ModulesPage } from './pages/ModulesPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { DailySalesPage } from './pages/sales/DailySalesPage';
@@ -52,6 +53,7 @@ export default function App() {
               <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
 
                 <Route element={<ProtectedRoute />}>
                   <Route path="/modules" element={<ModulesPage />} />

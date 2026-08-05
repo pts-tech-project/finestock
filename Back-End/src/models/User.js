@@ -50,6 +50,16 @@ const User = sequelize.define(
       allowNull: true,
       field: 'last_login_at',
     },
+    passwordResetToken: {
+      type: DataTypes.STRING(128),
+      allowNull: true,
+      field: 'password_reset_token',
+    },
+    passwordResetExpires: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: 'password_reset_expires',
+    },
   },
   {
     tableName: 'users',

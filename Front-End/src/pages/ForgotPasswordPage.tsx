@@ -6,6 +6,8 @@ import { ThemeToggle } from '../components/ThemeToggle';
 import { PoweredByFooter } from '../components/PoweredByFooter';
 import { Button } from '../components/ui/Button';
 import { Field, Input } from '../components/ui/Input';
+import { ApiError } from '../lib/api';
+import { forgotPasswordRequest } from '../lib/authApi';
 
 export function ForgotPasswordPage() {
   const { isAuthenticated } = useAuth();
@@ -30,9 +32,18 @@ export function ForgotPasswordPage() {
     }
 
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 700));
-    setLoading(false);
-    setSent(true);
+    try {
+      const res = await forgotPasswordRequest(email.trim());
+      if (res.data?.previewUrl) {
+        console.info('[FinStock] Password reset preview:', res.data.previewUrl);
+        window.open(res.data.previewUrl, '_blank', 'noopener,noreferrer');
+      }
+      setSent(true);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Unable to send reset email. Try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
