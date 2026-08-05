@@ -9,9 +9,20 @@ const { notFound, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
 
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://82.165.218.214'
+];
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS blocked: ${origin}`));
+      }
+    },
     credentials: true,
   })
 );
