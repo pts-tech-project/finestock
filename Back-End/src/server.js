@@ -57,8 +57,8 @@ async function start() {
       console.log(`Seeded ${seed.count} default role permissions`);
     }
 
-    const server = app.listen(PORT, () => {
-      console.log(`FinStock API listening on http://localhost:${PORT}`);
+    const server = app.listen(PORT, "0.0.0.0", () => {
+      console.log(`FinStock API listening on port ${PORT}`);
       if (process.env.RESEND_API_KEY) {
         console.log('Email: Resend (real delivery)');
       } else if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
