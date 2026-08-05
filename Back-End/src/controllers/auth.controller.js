@@ -111,10 +111,45 @@ async function register(req, res, next) {
   }
 }
 
+async function forgotPassword(req, res, next) {
+  try {
+    const { email } = req.body;
+    const result = await authService.requestPasswordReset(email);
+
+    return res.json({
+      success: true,
+      message: result.message,
+      data: {
+        emailSent: result.emailSent,
+        emailProvider: result.email?.provider || null,
+        previewUrl: result.email?.previewUrl || null,
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function resetPassword(req, res, next) {
+  try {
+    const { token, newPassword } = req.body;
+    await authService.resetPasswordWithToken({ token, newPassword });
+
+    return res.json({
+      success: true,
+      message: 'Password updated. You can sign in with your new password.',
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   login,
   me,
   updateMe,
   changePassword,
   register,
+  forgotPassword,
+  resetPassword,
 };

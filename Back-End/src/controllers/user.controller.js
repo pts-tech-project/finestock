@@ -2,7 +2,7 @@ const { Op } = require('sequelize');
 const { User } = require('../models');
 const authService = require('../services/auth.service');
 const { generatePassword, hashPassword } = require('../utils/password');
-const { sendWelcomeCredentials } = require('../services/email.service');
+const { sendWelcomeCredentials, sendPasswordResetCredentials } = require('../services/email.service');
 
 async function listUsers(req, res, next) {
   try {
@@ -169,7 +169,7 @@ async function resetPassword(req, res, next) {
     user.passwordHash = await hashPassword(plainPassword);
     await user.save();
 
-    const emailResult = await sendWelcomeCredentials({
+    const emailResult = await sendPasswordResetCredentials({
       name: user.name,
       email: user.email,
       password: plainPassword,

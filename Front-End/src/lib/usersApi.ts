@@ -39,6 +39,7 @@ export async function listUsers(params: UserListParams = {}): Promise<User[]> {
 export async function createUser(payload: UserWritePayload): Promise<{
   user: User;
   emailSent: boolean;
+  emailProvider?: string | null;
   previewUrl?: string | null;
 }> {
   const res = await apiFetch<
@@ -55,6 +56,7 @@ export async function createUser(payload: UserWritePayload): Promise<{
   return {
     user: mapUser(res.data.user),
     emailSent: Boolean(res.data.emailSent),
+    emailProvider: res.data.emailProvider,
     previewUrl: res.data.previewUrl,
   };
 }
@@ -77,12 +79,14 @@ export async function deactivateUser(id: string): Promise<User> {
 export async function resetUserPassword(id: string): Promise<{
   user: User;
   emailSent: boolean;
+  emailProvider?: string | null;
   previewUrl?: string | null;
 }> {
   const res = await apiFetch<
     ApiOk<{
       user: AuthUserPayload;
       emailSent: boolean;
+      emailProvider?: string | null;
       previewUrl?: string | null;
     }>
   >(`/api/users/${id}/reset-password`, {
@@ -91,6 +95,7 @@ export async function resetUserPassword(id: string): Promise<{
   return {
     user: mapUser(res.data.user),
     emailSent: Boolean(res.data.emailSent),
+    emailProvider: res.data.emailProvider,
     previewUrl: res.data.previewUrl,
   };
 }

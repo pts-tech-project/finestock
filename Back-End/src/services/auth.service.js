@@ -1,7 +1,9 @@
+const crypto = require('crypto');
+const { Op } = require('sequelize');
 const { User } = require('../models');
 const { generatePassword, hashPassword, verifyPassword } = require('../utils/password');
 const { signToken } = require('../utils/jwt');
-const { sendWelcomeCredentials } = require('./email.service');
+const { sendWelcomeCredentials, sendForgotPasswordLink } = require('./email.service');
 const roleService = require('./role.service');
 
 async function login(email, password) {
@@ -131,7 +133,88 @@ async function changePassword(user, { currentPassword, newPassword } = {}) {
   }
 
   user.passwordHash = await hashPassword(newPassword);
+  user.passwordResetToken = null;
+  user.passwordResetExpires = null;
   await user.save();
+  return true;
+}
+
+/**
+ * Always resolves successfully to avoid email enumeration.
+ * Sends a reset link only when an Active user exists.
+ */
+async function requestPasswordReset(email) {
+  const normalized = String(email || '').toLowerCase().trim();
+  const generic = {
+    message: 'If an account exists for that email, a reset link has been sent.',
+  };
+
+  if (!normalized || !normalized.includes('@')) {
+    const err = new Error('Please enter a valid email address');
+    err.status = 400;
+    throw err;
+  }
+
+  const user = await User.findOne({ where: { email: normalized, status: 'Active' } });
+  if (!user) {
+    return { ...generic, emailSent: false, email: null };
+  }
+
+  const rawToken = crypto.randomBytes(32).toString('hex');
+  const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+
+  user.passwordResetToken = tokenHash;
+  user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+  await user.save();
+
+  const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
+  const resetUrl = `${frontendUrl}/reset-password?token=${rawToken}`;
+
+  const emailResult = await sendForgotPasswordLink({
+    name: user.name,
+    email: user.email,
+    resetUrl,
+  });
+
+  return {
+    ...generic,
+    emailSent: Boolean(emailResult?.queued),
+    email: emailResult,
+  };
+}
+
+async function resetPasswordWithToken({ token, newPassword } = {}) {
+  if (!token || !newPassword) {
+    const err = new Error('Reset token and new password are required');
+    err.status = 400;
+    throw err;
+  }
+  if (String(newPassword).length < 8) {
+    const err = new Error('New password must be at least 8 characters');
+    err.status = 400;
+    throw err;
+  }
+
+  const tokenHash = crypto.createHash('sha256').update(String(token)).digest('hex');
+  const user = await User.findOne({
+    where: {
+      passwordResetToken: tokenHash,
+      passwordResetExpires: { [Op.gt]: new Date() },
+      status: 'Active',
+    },
+  });
+
+  if (!user) {
+    const err = new Error('This reset link is invalid or has expired');
+    err.status = 400;
+    throw err;
+  }
+
+  user.passwordHash = await hashPassword(newPassword);
+  user.passwordResetToken = null;
+  user.passwordResetExpires = null;
+  await user.save();
+
   return true;
 }
 
@@ -140,4 +223,6 @@ module.exports = {
   registerUser,
   updateProfile,
   changePassword,
+  requestPasswordReset,
+  resetPasswordWithToken,
 };

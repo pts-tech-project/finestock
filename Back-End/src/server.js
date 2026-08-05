@@ -1,5 +1,5 @@
 require('dotenv').config();
-
+const express = require('express');
 const app = require('./app');
 const sequelize = require('./config/database');
 require('./models');
@@ -7,6 +7,7 @@ const { seedDefaultsIfEmpty, ensureSystemRoles } = require('./services/role.serv
 
 const PORT = process.env.PORT || 5001;
 const isDev = process.env.NODE_ENV !== 'production';
+const path = require('path');
 
 process.on('unhandledRejection', (reason) => {
   console.error('[unhandledRejection]', reason);
@@ -54,8 +55,20 @@ async function start() {
       console.log(`Seeded ${seed.count} default role permissions`);
     }
 
-    const server = app.listen(PORT, () => {
-      console.log(`FinStock API listening on http://localhost:${PORT}`);
+    // Serve frontend build
+app.use(express.static('/var/www/finestockProd'));
+
+app.get(/^\/(?!api|api-docs).*/, (req, res) => {
+  res.sendFile('/var/www/finestockProd/index.html', (err) => {
+    if (err) {
+      console.error(`Error serving index.html: ${err.message}`);
+      res.status(500).send("Server error");
+    }
+  });
+});
+
+    const server = app.listen(PORT, "0.0.0.0", () => {
+      console.log(`FinStock API listening on port ${PORT}`);
       if (process.env.RESEND_API_KEY) {
         console.log('Email: Resend (real delivery)');
       } else if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {

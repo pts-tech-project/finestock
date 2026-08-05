@@ -96,4 +96,28 @@ export async function changePasswordRequest(payload: {
   });
 }
 
+export async function forgotPasswordRequest(email: string) {
+  return apiFetch<{
+    success: boolean;
+    message: string;
+    data: {
+      emailSent: boolean;
+      emailProvider?: string | null;
+      previewUrl?: string | null;
+    };
+  }>('/api/auth/forgot-password', {
+    method: 'POST',
+    auth: false,
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function resetPasswordRequest(payload: { token: string; newPassword: string }) {
+  return apiFetch<{ success: boolean; message: string }>('/api/auth/reset-password', {
+    method: 'POST',
+    auth: false,
+    body: JSON.stringify(payload),
+  });
+}
+
 export { ApiError, clearToken, getToken, setToken };

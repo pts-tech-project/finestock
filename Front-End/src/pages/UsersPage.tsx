@@ -161,11 +161,22 @@ export function UsersPage() {
           status: form.status,
         });
         setUsers((prev) => [result.user, ...prev]);
-        toast(
-          result.emailSent
-            ? 'User created. Login credentials have been emailed.'
-            : 'User created. Email could not be sent — check backend email config.',
-        );
+        if (result.previewUrl) {
+          toast(
+            'User created. Email is in test mode — open the preview link from the browser console or backend logs.',
+            'info',
+          );
+          console.info('[FinStock] Welcome email preview (Ethereal):', result.previewUrl);
+          window.open(result.previewUrl, '_blank', 'noopener,noreferrer');
+        } else if (result.emailSent) {
+          toast(
+            result.emailProvider === 'ethereal'
+              ? 'User created. Email is in Ethereal test mode (not a real inbox).'
+              : 'User created. Login credentials have been emailed.',
+          );
+        } else {
+          toast('User created. Email could not be sent — check backend email config.', 'error');
+        }
       }
       setModalOpen(false);
     } catch (err) {
@@ -201,11 +212,19 @@ export function UsersPage() {
     try {
       const result = await resetUserPassword(resetId);
       setResetId(null);
-      toast(
-        result.emailSent
-          ? 'Password reset. New credentials have been emailed.'
-          : 'Password reset. Email could not be sent — check backend email config.',
-      );
+      if (result.previewUrl) {
+        toast('Password reset. Open the Ethereal preview link to view the email.', 'info');
+        console.info('[FinStock] Reset email preview (Ethereal):', result.previewUrl);
+        window.open(result.previewUrl, '_blank', 'noopener,noreferrer');
+      } else if (result.emailSent) {
+        toast(
+          result.emailProvider === 'ethereal'
+            ? 'Password reset. Email is in Ethereal test mode (not a real inbox).'
+            : 'Password reset. New credentials have been emailed.',
+        );
+      } else {
+        toast('Password reset. Email could not be sent — check backend email config.', 'error');
+      }
     } catch (err) {
       toast(err instanceof ApiError ? err.message : 'Failed to reset password', 'error');
     } finally {
