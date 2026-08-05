@@ -1,0 +1,12 @@
+const express = require('express');
+const controller = require('../controllers/goodsReceipt.controller');
+const { authenticate, authorizeCompany, authorizePermission } = require('../middleware/auth');
+const router = express.Router({ mergeParams: true });
+router.use(authenticate, authorizeCompany);
+router.get('/eligible-purchase-orders', authorizePermission('Receive Goods'), controller.eligible);
+router.get('/', authorizePermission('Receive Goods'), controller.list);
+router.post('/', authorizePermission('Receive Goods'), controller.create);
+router.get('/:receiptId', authorizePermission('Receive Goods'), controller.get);
+router.patch('/:receiptId', authorizePermission('Receive Goods'), controller.update);
+router.post('/:receiptId/approve', authorizePermission('Approve Goods Receipt'), controller.approve);
+module.exports = router;

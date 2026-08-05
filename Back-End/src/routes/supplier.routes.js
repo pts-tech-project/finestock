@@ -1,22 +1,12 @@
 const express = require('express');
 const supplierController = require('../controllers/supplier.controller');
+const { authenticate, authorizeCompany, authorizePermission } = require('../middleware/auth');
 
 const router = express.Router({
   mergeParams: true,
 });
 
-// Temporary protection until authentication is connected.
-// These routes must not be publicly available in production.
-router.use((req, res, next) => {
-  if (process.env.NODE_ENV === 'production') {
-    return res.status(503).json({
-      success: false,
-      message: 'Supplier API requires authentication before production use',
-    });
-  }
-
-  return next();
-});
+router.use(authenticate, authorizeCompany, authorizePermission('Manage Suppliers'));
 
 router.get('/', supplierController.listSuppliers);
 router.post('/', supplierController.createSupplier);

@@ -1,159 +1,23 @@
-import { useMemo, useState, type FormEvent } from 'react';
-import { Plus } from 'lucide-react';
-import { Card, Badge, SearchInput, Pagination, formatCurrency } from '../components/ui/Card';
+import { useCallback, useEffect, useState } from 'react';
+import { Check, Plus } from 'lucide-react';
+import { Badge, Card, Pagination, SearchInput, formatCurrency } from '../components/ui/Card';
 import { DataTable, type Column } from '../components/ui/DataTable';
 import { Button } from '../components/ui/Button';
 import { Field, Input, Select, Textarea } from '../components/ui/Input';
-import { Modal } from '../components/ui/Modal';
+import { ConfirmDialog, Modal } from '../components/ui/Modal';
+import { approveExpense, createExpense, listExpenses } from '../api/expenses';
+import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { mockExpenses } from '../data/mockData';
 import type { Expense } from '../types';
 
+const initial = { category: 'Other' as Expense['category'], description: '', netAmount: '', vatAmount: '0', expenseDate: new Date().toISOString().slice(0, 10), paymentMethod: 'Bank Transfer' as Expense['paymentMethod'] };
 export function ExpensesPage() {
-  const { toast } = useToast();
-  const [expenses, setExpenses] = useState(mockExpenses);
-  const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('All');
-  const [page, setPage] = useState(1);
-  const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({
-    category: 'Rent' as Expense['category'],
-    description: '',
-    amount: '',
-    vat: '',
-    date: '',
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const pageSize = 5;
-
-  const filtered = useMemo(() => {
-    return expenses.filter((e) => {
-      const matchSearch = e.description.toLowerCase().includes(search.toLowerCase());
-      const matchCat = category === 'All' || e.category === category;
-      return matchSearch && matchCat;
-    });
-  }, [expenses, search, category]);
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const pageData = filtered.slice((page - 1) * pageSize, page * pageSize);
-
-  const handleSave = (e: FormEvent) => {
-    e.preventDefault();
-    const errs: Record<string, string> = {};
-    if (!form.description.trim()) errs.description = 'Description is required';
-    if (!form.amount || Number(form.amount) <= 0) errs.amount = 'Enter a valid amount';
-    setErrors(errs);
-    if (Object.keys(errs).length) return;
-
-    setExpenses((prev) => [
-      {
-        id: crypto.randomUUID(),
-        date: form.date ? new Date(form.date).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB'),
-        category: form.category,
-        description: form.description,
-        amount: Number(form.amount),
-        vat: Number(form.vat) || 0,
-        status: 'Pending',
-      },
-      ...prev,
-    ]);
-    setOpen(false);
-    toast('Expense added');
-  };
-
-  const columns: Column<Expense>[] = [
-    { key: 'date', header: 'Date', sortable: true },
-    { key: 'category', header: 'Category' },
-    { key: 'description', header: 'Description' },
-    {
-      key: 'amount',
-      header: 'Amount',
-      align: 'right',
-      render: (r) => formatCurrency(r.amount),
-    },
-    {
-      key: 'vat',
-      header: 'VAT',
-      align: 'right',
-      render: (r) => formatCurrency(r.vat),
-    },
-    {
-      key: 'status',
-      header: 'Status',
-      render: (r) => (
-        <Badge variant={r.status === 'Paid' ? 'success' : 'warning'}>{r.status}</Badge>
-      ),
-    },
-  ];
-
-  return (
-    <div className="page">
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Expenses</h1>
-          <p className="page-subtitle">Track operating expenses and receipts</p>
-        </div>
-        <Button onClick={() => { setErrors({}); setOpen(true); }}>
-          <Plus size={16} /> Add Expense
-        </Button>
-      </div>
-
-      <Card>
-        <div className="toolbar" style={{ marginBottom: '1rem' }}>
-          <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder="Search expenses..." />
-          <Select value={category} onChange={(e) => { setCategory(e.target.value); setPage(1); }} style={{ width: 160 }}>
-            <option value="All">All Categories</option>
-            <option>Rent</option>
-            <option>Utilities</option>
-            <option>Cleaning</option>
-            <option>Maintenance</option>
-            <option>Other</option>
-          </Select>
-        </div>
-        <DataTable columns={columns} data={pageData} keyField="id" />
-        <Pagination page={page} totalPages={totalPages} onChange={setPage} />
-      </Card>
-
-      <Modal
-        open={open}
-        onClose={() => setOpen(false)}
-        title="Add Expense"
-        footer={
-          <>
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button onClick={handleSave}>Save</Button>
-          </>
-        }
-      >
-        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <Field label="Category" htmlFor="ex-cat">
-            <Select id="ex-cat" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value as Expense['category'] })}>
-              <option>Rent</option>
-              <option>Utilities</option>
-              <option>Cleaning</option>
-              <option>Maintenance</option>
-              <option>Other</option>
-            </Select>
-          </Field>
-          <Field label="Description" htmlFor="ex-desc" error={errors.description}>
-            <Textarea id="ex-desc" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-          </Field>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-            <Field label="Amount" htmlFor="ex-amt" error={errors.amount}>
-              <Input id="ex-amt" type="number" step="0.01" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} error={!!errors.amount} />
-            </Field>
-            <Field label="VAT" htmlFor="ex-vat">
-              <Input id="ex-vat" type="number" step="0.01" value={form.vat} onChange={(e) => setForm({ ...form, vat: e.target.value })} />
-            </Field>
-          </div>
-          <Field label="Date" htmlFor="ex-date">
-            <Input id="ex-date" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
-          </Field>
-          <Field label="Receipt Upload" htmlFor="ex-receipt">
-            <Input id="ex-receipt" type="file" accept="image/*,.pdf" />
-          </Field>
-        </form>
-      </Modal>
-    </div>
-  );
+  const { toast } = useToast(); const { hasPermission } = useAuth();
+  const [rows, setRows] = useState<Expense[]>([]); const [search, setSearch] = useState(''); const [category, setCategory] = useState('All'); const [page, setPage] = useState(1); const [pages, setPages] = useState(1); const [open, setOpen] = useState(false); const [approving, setApproving] = useState<Expense | null>(null); const [form, setForm] = useState(initial); const [error, setError] = useState(''); const [saving, setSaving] = useState(false);
+  const load = useCallback(async () => { try { const result = await listExpenses({ search, category, page }); setRows(result.data); setPages(result.pagination?.totalPages ?? 1); setError(''); } catch (e) { setError(e instanceof Error ? e.message : 'Unable to load expenses'); } }, [search, category, page]);
+  useEffect(() => { const timer = setTimeout(() => void load(), 300); return () => clearTimeout(timer); }, [load]);
+  const save = async () => { if (!form.description.trim() || Number(form.netAmount) <= 0) return setError('Description and a positive net amount are required'); setSaving(true); try { await createExpense({ ...form, netAmount: Number(form.netAmount), vatAmount: Number(form.vatAmount) }); setOpen(false); setForm(initial); toast('Expense saved as draft'); await load(); } catch (e) { setError(e instanceof Error ? e.message : 'Unable to save expense'); } finally { setSaving(false); } };
+  const approve = async () => { if (!approving) return; try { await approveExpense(approving.id); setApproving(null); toast('Expense approved and locked'); await load(); } catch (e) { toast(e instanceof Error ? e.message : 'Unable to approve', 'error'); } };
+  const columns: Column<Expense>[] = [{ key: 'expenseNumber', header: 'Number' }, { key: 'expenseDate', header: 'Date' }, { key: 'category', header: 'Category' }, { key: 'description', header: 'Description' }, { key: 'grossAmount', header: 'Gross', align: 'right', render: r => formatCurrency(r.grossAmount) }, { key: 'vatAmount', header: 'VAT', align: 'right', render: r => formatCurrency(r.vatAmount) }, { key: 'status', header: 'Status', render: r => <Badge variant={r.status === 'APPROVED' ? 'success' : 'neutral'}>{r.status === 'APPROVED' ? 'Approved' : 'Draft'}</Badge> }, { key: 'actions', header: 'Approval', render: r => r.status === 'DRAFT' && hasPermission('Approve Expenses') ? <Button size="sm" variant="ghost" onClick={() => setApproving(r)}><Check size={14} /></Button> : null }];
+  return <div className="page"><div className="page-header"><div><h1 className="page-title">Expenses</h1><p className="page-subtitle">Record and approve operating expenses</p></div>{hasPermission('Manage Expenses') && <Button onClick={() => { setError(''); setOpen(true); }}><Plus size={16} /> Add Expense</Button>}</div><Card><div className="toolbar" style={{ marginBottom: '1rem' }}><SearchInput value={search} onChange={setSearch} placeholder="Search expenses..." /><Select value={category} onChange={e => setCategory(e.target.value)}><option>All</option><option>Rent</option><option>Utilities</option><option>Cleaning</option><option>Maintenance</option><option>Other</option></Select></div>{error && !open ? <p style={{ color: 'var(--color-danger)' }}>{error}</p> : <DataTable columns={columns} data={rows} keyField="id" emptyTitle="No expenses" />}<Pagination page={page} totalPages={pages} onChange={setPage} /></Card><Modal open={open} onClose={() => setOpen(false)} title="Add Expense" footer={<><Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button><Button loading={saving} onClick={() => void save()}>Save Draft</Button></>}><div style={{ display: 'grid', gap: '1rem' }}><Field label="Category"><Select value={form.category} onChange={e => setForm({ ...form, category: e.target.value as Expense['category'] })}><option>Rent</option><option>Utilities</option><option>Cleaning</option><option>Maintenance</option><option>Other</option></Select></Field><Field label="Description"><Textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} /></Field><Field label="Net Amount"><Input type="number" min="0.01" step="0.01" value={form.netAmount} onChange={e => setForm({ ...form, netAmount: e.target.value })} /></Field><Field label="VAT Amount"><Input type="number" min="0" step="0.01" value={form.vatAmount} onChange={e => setForm({ ...form, vatAmount: e.target.value })} /></Field><Field label="Date"><Input type="date" value={form.expenseDate} onChange={e => setForm({ ...form, expenseDate: e.target.value })} /></Field><Field label="Payment Method"><Select value={form.paymentMethod} onChange={e => setForm({ ...form, paymentMethod: e.target.value as Expense['paymentMethod'] })}><option>Cash</option><option>Card</option><option>Bank Transfer</option><option>Direct Debit</option><option>Other</option></Select></Field>{error && <p style={{ color: 'var(--color-danger)' }}>{error}</p>}</div></Modal><ConfirmDialog open={!!approving} title="Approve Expense" message={`Approve ${approving?.expenseNumber ?? ''}? It cannot be edited afterwards.`} confirmLabel="Approve & Lock" onCancel={() => setApproving(null)} onConfirm={() => void approve()} /></div>;
 }

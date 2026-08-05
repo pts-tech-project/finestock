@@ -5,14 +5,21 @@ const userRoutes = require('./routes/user.routes');
 const companyRoutes = require('./routes/company.routes');
 const roleRoutes = require('./routes/role.routes');
 const supplierRoutes = require('./routes/supplier.routes');
+const itemRoutes = require('./routes/item.routes');
+const purchaseOrderRoutes = require('./routes/purchaseOrder.routes');
+const goodsReceiptRoutes = require('./routes/goodsReceipt.routes');
+const stockRoutes = require('./routes/stock.routes');
+const expenseRoutes = require('./routes/expense.routes');
+const supplierInvoiceRoutes = require('./routes/supplierInvoice.routes');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
 
 const allowedOrigins = [
   'http://localhost:5173',
-  'http://82.165.218.214'
-];
+  'http://82.165.218.214',
+  process.env.FRONTEND_URL,
+].filter(Boolean);
 
 app.use(
   cors({
@@ -38,6 +45,12 @@ app.use('/api/users', userRoutes);
 app.use('/api/company', companyRoutes);
 app.use('/api/roles', roleRoutes);
 app.use('/api/companies/:companyId/suppliers', supplierRoutes);
+app.use('/api/companies/:companyId/items', itemRoutes);
+app.use('/api/companies/:companyId/purchase-orders', purchaseOrderRoutes);
+app.use('/api/companies/:companyId/goods-receipts', goodsReceiptRoutes);
+app.use('/api/companies/:companyId/stock', stockRoutes);
+app.use('/api/companies/:companyId/expenses', expenseRoutes);
+app.use('/api/companies/:companyId/supplier-invoices', supplierInvoiceRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

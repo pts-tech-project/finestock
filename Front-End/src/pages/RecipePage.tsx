@@ -20,7 +20,9 @@ export function RecipePage() {
   const [cost, setCost] = useState('');
 
   const totalCost = ingredients.reduce((sum, i) => sum + i.cost, 0);
-  const profit = product.sellingPrice - totalCost;
+  const sellingPrice = product.sellingPrice ?? 0;
+  const profit = sellingPrice - totalCost;
+  const margin = sellingPrice > 0 ? (profit / sellingPrice) * 100 : 0;
 
   const addIngredient = () => {
     if (!name.trim() || !quantity.trim()) {
@@ -94,7 +96,7 @@ export function RecipePage() {
             </div>
             <div className="cost-row">
               <span>Selling Price</span>
-              <strong>{formatCurrency(product.sellingPrice)}</strong>
+              <strong>{formatCurrency(sellingPrice)}</strong>
             </div>
             <div className="cost-row profit">
               <span>Profit</span>
@@ -103,11 +105,11 @@ export function RecipePage() {
             <div className="margin-bar">
               <div
                 className="margin-fill"
-                style={{ width: `${Math.min(100, (profit / product.sellingPrice) * 100)}%` }}
+                style={{ width: `${Math.max(0, Math.min(100, margin))}%` }}
               />
             </div>
             <p className="text-muted" style={{ fontSize: '0.8rem', marginTop: '0.5rem' }}>
-              Gross margin: {((profit / product.sellingPrice) * 100).toFixed(1)}%
+              Gross margin: {margin.toFixed(1)}%
             </p>
           </div>
         </Card>

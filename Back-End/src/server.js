@@ -42,13 +42,10 @@ async function start() {
 
     // Avoid alter:true on every boot in production — it is slow and can lock tables.
     // Use `npm run db:sync` when you intentionally want schema changes.
-    if (isDev) {
-      await sequelize.sync({ alter: true });
-      console.log('Database models synced (alter)');
-    } else {
-      await sequelize.sync();
-      console.log('Database models synced');
-    }
+    // Create missing tables only. `alter: true` on every development boot can
+    // repeatedly create MySQL indexes and eventually prevent the API starting.
+    await sequelize.sync();
+    console.log(isDev ? 'Database models checked' : 'Database models synced');
 
     await widenRoleColumns();
     await ensureSystemRoles();

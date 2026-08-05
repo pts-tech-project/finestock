@@ -44,13 +44,19 @@ export interface CompanyProfile {
 
 export interface Product {
   id: string;
+  itemCode: string;
   name: string;
+  itemType: 'INGREDIENT' | 'MENU_ITEM';
   category: string;
-  sellingPrice: number;
-  vatRate: number;
-  cost: number;
+  unit: string;
+  sellingPrice: number | null;
+  vatRate: number | null;
+  costPerUnit: number | null;
+  reorderLevel: number | null;
   status: 'Active' | 'Inactive';
-  description?: string;
+  description?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface RecipeIngredient {
@@ -147,39 +153,103 @@ export interface Supplier {
 export interface PurchaseOrder {
   id: string;
   poNumber: string;
-  supplier: string;
-  date: string;
-  amount: number;
-  status: 'Draft' | 'Sent' | 'Received' | 'Completed' | 'Cancelled';
+  supplierId: string | null;
+  supplierName: string;
+  orderDate: string;
+  expectedDeliveryDate: string | null;
+  notes: string | null;
+  status: 'DRAFT' | 'APPROVED' | 'PARTIALLY_RECEIVED' | 'RECEIVED' | 'CANCELLED';
+  subtotal: number;
+  vatAmount: number;
+  totalAmount: number;
+  receivedAmount: number;
+  balanceAmount: number;
+  approvedAt: string | null;
+  lines: PurchaseOrderLine[];
+}
+
+export interface PurchaseOrderLine {
+  id: string;
+  itemId: string;
+  itemCode: string;
+  itemName: string;
+  unit: string;
+  orderedQuantity: number;
+  receivedQuantity: number;
+  balanceQuantity: number;
+  unitPrice: number;
+  vatRate: number;
+  lineSubtotal: number;
+  vatAmount: number;
+  lineTotal: number;
+  receivedAmount: number;
+  balanceAmount: number;
+  item?: Product;
 }
 
 export interface GoodsReceipt {
   id: string;
-  poNumber: string;
-  supplier: string;
-  expectedItems: number;
-  receivedItems: number;
-  status: 'Pending' | 'Partial' | 'Complete';
+  purchaseOrderId: string;
+  grnNumber: string;
+  receiptDate: string;
+  deliveryNoteNumber: string | null;
+  notes: string | null;
+  status: 'DRAFT' | 'APPROVED';
+  totalAmount: number;
+  approvedAt: string | null;
+  purchaseOrder: { id: string; poNumber: string; supplierName: string; status: PurchaseOrder['status'] };
+  lines: GoodsReceiptLine[];
+  invoiceExpected?: { netAmount: number; vatAmount: number; totalAmount: number };
+}
+
+export interface GoodsReceiptLine {
+  id: string;
+  purchaseOrderLineId: string;
+  itemId: string;
+  itemCode: string;
+  itemName: string;
+  unit: string;
+  quantityReceived: number;
+  unitCost: number;
+  lineAmount: number;
 }
 
 export interface SupplierInvoice {
   id: string;
   invoiceNumber: string;
-  supplier: string;
-  date: string;
-  amount: number;
-  vat: number;
-  status: 'Pending' | 'Paid' | 'Overdue';
+  supplierId: string | null;
+  supplierName: string;
+  purchaseOrderId: string;
+  goodsReceiptId: string;
+  invoiceDate: string;
+  dueDate: string | null;
+  notes: string | null;
+  netAmount: number;
+  vatAmount: number;
+  totalAmount: number;
+  paidAmount: number;
+  balanceAmount: number;
+  status: 'DRAFT' | 'APPROVED' | 'PARTIALLY_PAID' | 'PAID' | 'CANCELLED';
+  approvedAt: string | null;
+  attachmentOriginalName: string | null;
+  attachmentMimeType: string | null;
+  attachmentSize: number | null;
+  attachmentSha256: string | null;
+  goodsReceipt: { id: string; grnNumber: string; receiptDate: string; totalAmount: number; status: GoodsReceipt['status'] };
+  purchaseOrder: { id: string; poNumber: string; supplierId: string | null; supplierName: string };
 }
 
 export interface Expense {
   id: string;
-  date: string;
+  expenseNumber: string;
+  expenseDate: string;
   category: 'Rent' | 'Utilities' | 'Cleaning' | 'Maintenance' | 'Other';
   description: string;
-  amount: number;
-  vat: number;
-  status: 'Paid' | 'Pending';
+  netAmount: number;
+  vatAmount: number;
+  grossAmount: number;
+  paymentMethod: 'Cash' | 'Card' | 'Bank Transfer' | 'Direct Debit' | 'Other';
+  status: 'DRAFT' | 'APPROVED';
 }
 
 export interface Transaction {

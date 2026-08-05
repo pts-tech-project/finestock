@@ -1,0 +1,14 @@
+const express = require('express');
+const controller = require('../controllers/supplierInvoice.controller');
+const { authenticate, authorizeCompany, authorizePermission } = require('../middleware/auth');
+const invoiceUpload = require('../middleware/invoiceUpload');
+const router = express.Router({ mergeParams: true });
+router.use(authenticate, authorizeCompany);
+router.get('/eligible-goods-receipts', authorizePermission('Manage Supplier Invoices'), controller.eligible);
+router.get('/', authorizePermission('Manage Supplier Invoices'), controller.list);
+router.post('/', authorizePermission('Manage Supplier Invoices'), invoiceUpload, controller.create);
+router.get('/:invoiceId', authorizePermission('Manage Supplier Invoices'), controller.get);
+router.get('/:invoiceId/attachment', authorizePermission('Manage Supplier Invoices'), controller.attachment);
+router.patch('/:invoiceId', authorizePermission('Manage Supplier Invoices'), invoiceUpload, controller.update);
+router.post('/:invoiceId/approve', authorizePermission('Approve Supplier Invoices'), controller.approve);
+module.exports = router;

@@ -1,0 +1,12 @@
+const express = require('express');
+const controller = require('../controllers/expense.controller');
+const { authenticate, authorizeCompany, authorizePermission } = require('../middleware/auth');
+const router = express.Router({ mergeParams: true });
+router.use(authenticate, authorizeCompany);
+router.get('/summary', authorizePermission('Manage Expenses'), controller.summary);
+router.get('/', authorizePermission('Manage Expenses'), controller.list);
+router.post('/', authorizePermission('Manage Expenses'), controller.create);
+router.get('/:expenseId', authorizePermission('Manage Expenses'), controller.get);
+router.patch('/:expenseId', authorizePermission('Manage Expenses'), controller.update);
+router.post('/:expenseId/approve', authorizePermission('Approve Expenses'), controller.approve);
+module.exports = router;
