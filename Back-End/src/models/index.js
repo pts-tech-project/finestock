@@ -11,6 +11,8 @@ const GoodsReceipt = require('./GoodsReceipt');
 const GoodsReceiptLine = require('./GoodsReceiptLine');
 const StockBalance = require('./StockBalance');
 const StockMovement = require('./StockMovement');
+const Expense = require('./Expense');
+const SupplierInvoice = require('./SupplierInvoice');
 
 Company.hasMany(User, { foreignKey: 'companyId', as: 'users' });
 User.belongsTo(Company, { foreignKey: 'companyId', as: 'company' });
@@ -40,9 +42,19 @@ Item.hasOne(StockBalance, { foreignKey: 'itemId', as: 'stockBalance' });
 StockBalance.belongsTo(Item, { foreignKey: 'itemId', as: 'item' });
 Item.hasMany(StockMovement, { foreignKey: 'itemId', as: 'stockMovements' });
 StockMovement.belongsTo(Item, { foreignKey: 'itemId', as: 'item' });
+Company.hasMany(Expense, { foreignKey: 'companyId', as: 'expenses', onDelete: 'CASCADE' });
+Expense.belongsTo(Company, { foreignKey: 'companyId', as: 'company' });
+Company.hasMany(SupplierInvoice, { foreignKey: 'companyId', as: 'supplierInvoices', onDelete: 'CASCADE' });
+SupplierInvoice.belongsTo(Company, { foreignKey: 'companyId', as: 'company' });
+Supplier.hasMany(SupplierInvoice, { foreignKey: 'supplierId', as: 'invoices' });
+SupplierInvoice.belongsTo(Supplier, { foreignKey: 'supplierId', as: 'supplier' });
+PurchaseOrder.hasMany(SupplierInvoice, { foreignKey: 'purchaseOrderId', as: 'supplierInvoices' });
+SupplierInvoice.belongsTo(PurchaseOrder, { foreignKey: 'purchaseOrderId', as: 'purchaseOrder' });
+GoodsReceipt.hasOne(SupplierInvoice, { foreignKey: 'goodsReceiptId', as: 'supplierInvoice' });
+SupplierInvoice.belongsTo(GoodsReceipt, { foreignKey: 'goodsReceiptId', as: 'goodsReceipt' });
 
 module.exports = {
   User, Company, Role, RolePermission, Supplier, CompanySupplier, Item,
   PurchaseOrder, PurchaseOrderLine, GoodsReceipt, GoodsReceiptLine,
-  StockBalance, StockMovement,
+  StockBalance, StockMovement, Expense, SupplierInvoice,
 };

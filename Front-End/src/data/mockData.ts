@@ -7,7 +7,6 @@ import type {
   Supplier,
   PurchaseOrder,
   GoodsReceipt,
-  SupplierInvoice,
   Expense,
   Transaction,
   VatReturn,
@@ -114,18 +113,8 @@ export const mockPurchaseOrders: PurchaseOrder[] = [
 
 export const mockGoodsReceipts: GoodsReceipt[] = [];
 
-export const mockSupplierInvoices: SupplierInvoice[] = [
-  { id: '1', invoiceNumber: 'INV-8841', supplier: 'Fresh Foods Ltd', date: '22/07/2026', amount: 850, vat: 170, status: 'Paid' },
-  { id: '2', invoiceNumber: 'INV-8842', supplier: 'Dairy Direct', date: '21/07/2026', amount: 420, vat: 84, status: 'Pending' },
-  { id: '3', invoiceNumber: 'INV-8830', supplier: 'Beverage Wholesale', date: '10/07/2026', amount: 310, vat: 62, status: 'Overdue' },
-];
-
 export const mockExpenses: Expense[] = [
-  { id: '1', date: '01/07/2026', category: 'Rent', description: 'Monthly restaurant rent', amount: 4500, vat: 0, status: 'Paid' },
-  { id: '2', date: '05/07/2026', category: 'Utilities', description: 'Electricity & gas', amount: 680, vat: 136, status: 'Paid' },
-  { id: '3', date: '12/07/2026', category: 'Cleaning', description: 'Weekly deep clean', amount: 250, vat: 50, status: 'Paid' },
-  { id: '4', date: '18/07/2026', category: 'Maintenance', description: 'Fridge repair', amount: 320, vat: 64, status: 'Pending' },
-  { id: '5', date: '20/07/2026', category: 'Other', description: 'Staff uniforms', amount: 180, vat: 36, status: 'Paid' },
+  { id: '1', expenseNumber: 'EXP-2026-00001', expenseDate: '2026-07-01', category: 'Rent', description: 'Monthly restaurant rent', netAmount: 4500, vatAmount: 0, grossAmount: 4500, paymentMethod: 'Bank Transfer', status: 'APPROVED' },
 ];
 
 export const mockTransactions: Transaction[] = [

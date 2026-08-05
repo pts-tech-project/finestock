@@ -199,6 +199,7 @@ export interface GoodsReceipt {
   approvedAt: string | null;
   purchaseOrder: { id: string; poNumber: string; supplierName: string; status: PurchaseOrder['status'] };
   lines: GoodsReceiptLine[];
+  invoiceExpected?: { netAmount: number; vatAmount: number; totalAmount: number };
 }
 
 export interface GoodsReceiptLine {
@@ -216,21 +217,39 @@ export interface GoodsReceiptLine {
 export interface SupplierInvoice {
   id: string;
   invoiceNumber: string;
-  supplier: string;
-  date: string;
-  amount: number;
-  vat: number;
-  status: 'Pending' | 'Paid' | 'Overdue';
+  supplierId: string | null;
+  supplierName: string;
+  purchaseOrderId: string;
+  goodsReceiptId: string;
+  invoiceDate: string;
+  dueDate: string | null;
+  notes: string | null;
+  netAmount: number;
+  vatAmount: number;
+  totalAmount: number;
+  paidAmount: number;
+  balanceAmount: number;
+  status: 'DRAFT' | 'APPROVED' | 'PARTIALLY_PAID' | 'PAID' | 'CANCELLED';
+  approvedAt: string | null;
+  attachmentOriginalName: string | null;
+  attachmentMimeType: string | null;
+  attachmentSize: number | null;
+  attachmentSha256: string | null;
+  goodsReceipt: { id: string; grnNumber: string; receiptDate: string; totalAmount: number; status: GoodsReceipt['status'] };
+  purchaseOrder: { id: string; poNumber: string; supplierId: string | null; supplierName: string };
 }
 
 export interface Expense {
   id: string;
-  date: string;
+  expenseNumber: string;
+  expenseDate: string;
   category: 'Rent' | 'Utilities' | 'Cleaning' | 'Maintenance' | 'Other';
   description: string;
-  amount: number;
-  vat: number;
-  status: 'Paid' | 'Pending';
+  netAmount: number;
+  vatAmount: number;
+  grossAmount: number;
+  paymentMethod: 'Cash' | 'Card' | 'Bank Transfer' | 'Direct Debit' | 'Other';
+  status: 'DRAFT' | 'APPROVED';
 }
 
 export interface Transaction {

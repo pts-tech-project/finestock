@@ -60,7 +60,9 @@ export async function apiFetch<T = unknown>(
   const contentType = response.headers.get('content-type') || '';
   const body = contentType.includes('application/json')
     ? await response.json().catch(() => null)
-    : await response.text().catch(() => null);
+    : contentType.includes('application/pdf') || contentType.startsWith('image/')
+      ? await response.blob()
+      : await response.text().catch(() => null);
 
   if (!response.ok) {
     const message =

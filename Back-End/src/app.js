@@ -9,6 +9,8 @@ const itemRoutes = require('./routes/item.routes');
 const purchaseOrderRoutes = require('./routes/purchaseOrder.routes');
 const goodsReceiptRoutes = require('./routes/goodsReceipt.routes');
 const stockRoutes = require('./routes/stock.routes');
+const expenseRoutes = require('./routes/expense.routes');
+const supplierInvoiceRoutes = require('./routes/supplierInvoice.routes');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -30,6 +32,8 @@ app.use('/api/companies/:companyId/items', itemRoutes);
 app.use('/api/companies/:companyId/purchase-orders', purchaseOrderRoutes);
 app.use('/api/companies/:companyId/goods-receipts', goodsReceiptRoutes);
 app.use('/api/companies/:companyId/stock', stockRoutes);
+app.use('/api/companies/:companyId/expenses', expenseRoutes);
+app.use('/api/companies/:companyId/supplier-invoices', supplierInvoiceRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
