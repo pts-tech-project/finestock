@@ -1,6 +1,10 @@
+// Empty string = same origin (API + UI served from one Express port in production).
+// Omit the env var locally to default to the Vite-dev backend.
+const rawApiBase = import.meta.env.VITE_API_BASE_URL as string | undefined;
 const API_BASE_URL =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, '') ||
-  'http://localhost:5001';
+  rawApiBase === undefined
+    ? 'http://localhost:5001'
+    : String(rawApiBase).replace(/\/$/, '');
 
 const TOKEN_KEY = 'finstock_token';
 
