@@ -83,19 +83,23 @@ app.use('/api/companies/:companyId/suppliers', supplierRoutes);
  *     └── index.html
  *
  */
-const frontendPath =
-  process.env.FRONTEND_DIST || path.join(__dirname, '..', 'dist');
+// Serve frontend build
+const frontendPath = path.join(__dirname, '..', 'dist');
 
-console.log('Frontend directory:', frontendPath);
+console.log('Frontend path:', frontendPath);
 
 app.use(express.static(frontendPath));
 
-/**
- * React Router fallback
- * Ignore API routes
- */
-app.get(/^\/(?!api).*/, (req, res) => {
-  res.sendFile(path.join(frontendPath, 'index.html'));
+app.get(/^\/(?!api\/).*/, (req, res) => {
+  res.sendFile(
+    path.join(frontendPath, 'index.html'),
+    (err) => {
+      if (err) {
+        console.error('Failed to load frontend:', err.message);
+        res.status(500).send('Frontend loading error');
+      }
+    }
+  );
 });
 
 
