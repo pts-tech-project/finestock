@@ -5,8 +5,7 @@ const sequelize = require('./config/database');
 require('./models');
 const { seedDefaultsIfEmpty, ensureSystemRoles } = require('./services/role.service');
 
-const PORT = process.env.PORT || 5001;
-const isDev = process.env.NODE_ENV !== 'production';
+const PORT = process.env.PORT || 5080;
 
 process.on('unhandledRejection', (reason) => {
   console.error('[unhandledRejection]', reason);
@@ -34,14 +33,41 @@ async function widenRoleColumns() {
   }
 }
 
+/**
+ * Sequelize sync({ alter: true }) repeatedly adds UNIQUE on users.email
+ * until MySQL hits "Too many keys specified; max 64 keys allowed".
+ * Keep one unique index; drop the rest.
+ */
+async function cleanupDuplicateUserEmailIndexes() {
+  try {
+    const [rows] = await sequelize.query('SHOW INDEX FROM `users`');
+    const emailUnique = rows.filter(
+      (r) => r.Column_name === 'email' && Number(r.Non_unique) === 0 && r.Key_name !== 'PRIMARY'
+    );
+    const names = [...new Set(emailUnique.map((r) => r.Key_name))];
+    if (names.length <= 1) return;
+
+    for (const name of names.slice(1)) {
+      await sequelize.query(`ALTER TABLE \`users\` DROP INDEX \`${name}\``);
+      console.log(`[schema] dropped duplicate users index: ${name}`);
+    }
+    console.log(`[schema] kept users email unique index: ${names[0]} (${names.length - 1} duplicates removed)`);
+  } catch (err) {
+    console.warn('[schema] email index cleanup skipped:', err.message);
+  }
+}
+
 async function start() {
   try {
     await sequelize.authenticate();
     console.log('Database connection established');
 
-    // Avoid alter:true on every boot in production — it is slow and can lock tables.
-    // Use `npm run db:sync` when you intentionally want schema changes.
-    if (isDev) {
+    await cleanupDuplicateUserEmailIndexes();
+
+    // Never use alter:true on every boot — it duplicates UNIQUE indexes on MySQL.
+    // Opt in with DB_SYNC_ALTER=true, or run: npm run db:sync
+    const useAlter = process.env.DB_SYNC_ALTER === 'true';
+    if (useAlter) {
       await sequelize.sync({ alter: true });
       console.log('Database models synced (alter)');
     } else {

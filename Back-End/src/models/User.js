@@ -19,7 +19,6 @@ const User = sequelize.define(
     email: {
       type: DataTypes.STRING(255),
       allowNull: false,
-      unique: true,
       validate: {
         isEmail: true,
       },
@@ -65,6 +64,8 @@ const User = sequelize.define(
     tableName: 'users',
     underscored: true,
     timestamps: true,
+    // Named unique index — avoids Sequelize alter creating endless duplicate UNIQUEs
+    indexes: [{ name: 'users_email_unique', unique: true, fields: ['email'] }],
   }
 );
 
