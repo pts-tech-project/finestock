@@ -43,10 +43,9 @@ app.use('/api/company', companyRoutes);
 app.use('/api/roles', roleRoutes);
 app.use('/api/companies/:companyId/suppliers', supplierRoutes);
 
-// Serve frontend build (same pattern as other PTS apps on this server)
+// Serve frontend build from Back-End/dist (same layout as other PTS apps)
 const frontendDist =
-  process.env.FRONTEND_DIST ||
-  path.join(__dirname, '..', '..', 'Front-End', 'dist');
+  process.env.FRONTEND_DIST || path.join(__dirname, '..', 'dist');
 
 app.use(express.static(frontendDist));
 
@@ -54,7 +53,7 @@ app.get(/^\/(?!api|health).*/, (req, res) => {
   res.sendFile(path.join(frontendDist, 'index.html'), (err) => {
     if (err) {
       console.error(`Error serving index.html: ${err.message}`);
-      res.status(500).send('Server error — is FRONTEND_DIST built and set?');
+      res.status(500).send('Server error — build Front-End and copy dist into Back-End/dist');
     }
   });
 });
