@@ -12,7 +12,7 @@ const app = express();
 
 const allowedOrigins = [
   'http://localhost:5173',
-  'http://82.165.218.214',
+  'http://82.165.218.214:5080',
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
