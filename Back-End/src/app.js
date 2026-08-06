@@ -84,7 +84,7 @@ app.use('/api/companies/:companyId/suppliers', supplierRoutes);
  *
  */
 // Serve frontend build
-const frontendPath = path.join(__dirname, '..', 'dist');
+const frontendPath = path.join(__dirname, 'dist');
 
 console.log('Frontend path:', frontendPath);
 
